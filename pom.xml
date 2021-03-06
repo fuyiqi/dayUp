@@ -15,7 +15,8 @@
             <version>6.8.7</version>
             <exclusions>
                 <exclusion>
-
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
