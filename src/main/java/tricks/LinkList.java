@@ -12,6 +12,7 @@ class LinkNode {
 
     public LinkNode(int elem) {
         this.elem = elem;
+        this.next = null;
     }
 
     public LinkNode() {
@@ -20,7 +21,7 @@ class LinkNode {
     }
 
     public String toString(){
-        return "elem="+this.elem;
+        return "elem="+ this.elem +",next="+ this.next.elem;
     }
 }
 
@@ -122,18 +123,77 @@ public class LinkList {
             System.out.println("原地逆置链表长度小于3");
             return;
         }
+        LinkNode firstNode = node.next;
+        LinkNode curNode = firstNode.next;
 
+        while (curNode!=null){
+            LinkNode tmpNode = curNode;
+            curNode=curNode.next;
+            tmpNode.next=node.next;
+            node.next=tmpNode;
+        }
+        firstNode.next=null;
+    }
 
-
-
-
-
+    public void reverseLocal2(LinkNode node){
+        int linkListLength = getLength(node);
+        if(linkListLength<=2){
+            System.out.println("原地逆置链表长度小于3");
+            return;
+        }
+        LinkNode firstNode = node.next;
+        LinkNode curNode = firstNode.next;
+        for(int i =2;i<linkListLength;i++){
+            LinkNode tmpNode = curNode;
+            curNode=curNode.next;
+            tmpNode.next=node.next;
+            node.next=tmpNode;
+        }
+        firstNode.next=null;
     }
 
 
 
+    /**
+     * @Description: 原地逆置带头节点的单链表的部分元素
+     * **/
+    public void partialReverseLocal(LinkNode node, int start,int end){
+        int linkListLength = getLength(node);
+        if(linkListLength<=2){
+            System.out.println("原地逆置链表长度小于3");
+            return;
+        }
+        if(!(start<=end && end<=linkListLength)){
+            System.out.println("原地逆置链表的起始或终止位置非法");
+            return;
+        }
 
+        LinkNode curNode = node;
+        //找到start的前驱
+        for(int i=0;i<start-1;i++){
+            curNode=curNode.next;
+        }
+        //构建带头节点的单链表
+        LinkNode headNode = new LinkNode();
+        headNode.next=curNode.next;
+        //开始原地逆置
+        LinkNode firstNode = headNode.next;
+        curNode = firstNode.next;
+        for(int i =0;i<end-start;i++){
+            LinkNode tmpNode = curNode;
+            curNode=curNode.next;
+            tmpNode.next=headNode.next;
+            headNode.next=tmpNode;
+        }
+        firstNode.next=curNode;
 
+        //去掉增加的头节点
+        curNode = node;
+        for(int i=0;i<start-1;i++){
+            curNode=curNode.next;
+        }
+        curNode.next = headNode.next;
+    }
 
 
     @Test
@@ -142,7 +202,7 @@ public class LinkList {
         LinkNode node = initByTail(nums);
 
         //System.out.println(getLength(node));
-        delByPos(node,3);
+        partialReverseLocal(node,3,6);
         show(node);
     }
 
