@@ -29,6 +29,7 @@ public class Sort {
 
     /**
      * @Description: 选择排升序
+     * 有序部分nums[0,i) 无序部分nums[i,n)
      * 第i次遍历的时候找到第i小的数并放在数组第i的位置上
      * **/
     private void selectSort(int[] nums){
@@ -86,19 +87,58 @@ public class Sort {
 
 
     /**
-     * @Description: 插入排序
+     * @Description: 插入排升序
+     * 将数组nums[0,n)划分为有序的部分nums[0,i)，无序的部分nums[i,n)，
+     * 第i次的迭代可以通过两两比较的方式将nums[i]插入到有序部分的合适位置上
      * **/
     private void insertSort(int[] nums){
-
+        int low=0;int nums_len=nums.length;
+        while (++low<nums_len){
+            int findPos = low;
+            while (findPos>=1&&nums[findPos]<nums[findPos-1]){//通过逆序对由后向前找位置
+               swap(nums,findPos-1,findPos);
+                findPos--;//继续由后向前找位置
+            }
+        }
     }
+
+
+
 
 
     /**
      * @Description: 快速排序
      * **/
-    private void quickSort(int[] nums){
-
+    private void quickSort(int[] nums,int low,int high){
+        if(low>=high){
+            return;
+        }
+        int pivot_index = getPivotIndex(nums,low,high);
+        quickSort(nums,low,pivot_index-1);
+        quickSort(nums,pivot_index+1,high);
     }
+
+    private int getPivotIndex(int[] nums,int low,int high){
+        int pivot = nums[low];
+        while (low<high){
+            while (pivot<=nums[high]&& low<high){//大于等于pivot的部分
+                high--;
+            }
+            //不是这个部分的，划到小于pivot的部分
+            nums[low]=nums[high];
+
+            while (nums[low]<pivot&& low<high){//小于pivot的部分
+                low++;
+            }
+            //不是这个部分的，划到大于等于pivot的部分
+            nums[high]=nums[low];
+            //pivot放到合适的位置
+            nums[low]=pivot;
+        }
+        return low;
+    }
+
+ /*#*#*#*#*#*#*#*#*#*#*/
 
     /**
      * @Description: 堆排序
@@ -107,7 +147,12 @@ public class Sort {
 
     }
 
+    /**
+     * @Description: 希尔排序
+     * **/
+    private void shellSort(int[] nums){
 
+    }
 
     @Test
     public void main(){
@@ -116,11 +161,116 @@ public class Sort {
         //selectSort(a2);
         //bubbleSort1_1(a2);
         //bubbleSort1_2(a2);
-
+        //insertSort(a2);
+        quickSort(a2,0,5);
         System.out.println("\n =====排序后======");
         show(a2);
 
     }
+
+    @Test
+    /**
+     * @Description: 合并两个有序数组<占用空间>
+     */
+    private void twoSorted2One(){
+        int[] a1 = {1,5,9};
+        int[] a2 = {2,99,100,101};
+
+        int[] longger,shorter;
+        if(a1.length>a2.length){
+            longger=a1;
+            shorter=a2;
+        }else {
+            longger=a2;
+            shorter=a1;
+        }
+
+        int shorter_low=0,shorter_len=shorter.length;
+        int longger_low=0,longger_len=longger.length;
+        int cnt=0;int[] res = new int[shorter_len+longger_len];
+
+        while (shorter_low<shorter_len && longger_low<longger_len){
+
+                while (shorter_low<shorter_len && shorter[shorter_low] < longger[longger_low]) {
+                    res[cnt++]=shorter[shorter_low++];
+                }
+                while (shorter_low<shorter_len && longger[longger_low] <= shorter[shorter_low]) {
+                    res[cnt++]=longger[longger_low++];
+                }
+
+        }
+        while (longger_low<longger_len){
+            res[cnt++]=longger[longger_low++];
+        }
+
+        //show(res);
+
+    }
+
+    @Test
+    private void twoSorted2OneLocal(){
+        int[] a1 = {1,5,9,0,0,0,0};
+        int[] a2 = {2,99,100,101};
+
+        //将a2添加到a1
+        //插入排序思想
+    }
+
+    @Test
+    /**
+     * 通过pivot将nums[0,n)划分为小于pivot的部分和大于等于pivot的部分
+     * **/
+    private void getPartitionIndex(){
+        int[] a = {66,99,102,4,67,8};
+
+        //假设以首元素为pivot
+        int pivot = a[0];
+
+        int low=0,high=a.length-1;
+        while (low<high){
+
+            while (pivot<=a[high]&& low<high){//大于等于pivot的部分
+                high--;
+            }
+            //不是这个部分的，划到小于pivot的部分
+            a[low]=a[high];
+
+            while (a[low]<pivot&& low<high){//小于pivot的部分
+                low++;
+            }
+            //不是这个部分的，划到大于等于pivot的部分
+            a[high]=a[low];
+            //pivot放到合适的位置
+            a[low]=pivot;
+
+            show(a);
+            System.out.println();
+        }
+        //System.out.println(low);
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
