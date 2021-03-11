@@ -196,6 +196,24 @@ public class LinkList {
     }
 
 
+    /**
+     * @Description: 合并两个排序的链表
+     */
+    public LinkNode mergeTwoLists(LinkNode l1,LinkNode l2){
+
+
+        return null;
+    }
+
+
+
+
+
+
+
+
+
+
     @Test
     public void test(){
         int[] nums = {1,2,3,4,5,6,7};
@@ -207,7 +225,17 @@ public class LinkList {
     }
 
 
+    @Test
+    public void t2(){
+        int[] a1={1,5,9};
+        int[] a2={2,99,100,101};
 
+        LinkNode l1 = initByTail(a1);
+        LinkNode l2 = initByTail(a2);
+        LinkNode res = mergeTwoLists(l1,l2);
+
+
+    }
 
 
 

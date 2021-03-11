@@ -209,7 +209,7 @@ public class Sort {
 
     @Test
     private void twoSorted2OneLocal(){
-        int[] a1 = {1,5,9,0,0,0,0};
+        int[] a1 = {1,5,9};
         int[] a2 = {2,99,100,101};
 
         //将a2添加到a1
