@@ -209,11 +209,27 @@ public class Sort {
 
     @Test
     private void twoSorted2OneLocal(){
-        int[] a1 = {1,5,9};
-        int[] a2 = {2,99,100,101};
 
-        //将a2添加到a1
-        //插入排序思想
+        int[] nums = {2,99,100,101,1,5,9};
+        int low=3;int nums_len=nums.length;
+        while (++low<nums_len){
+            int findPos = low;
+            while (findPos>=1&&nums[findPos]<nums[findPos-1]){//通过逆序对由后向前找位置
+                swap(nums,findPos-1,findPos);
+                findPos--;//继续由后向前找位置
+            }
+        }
+        show(nums);
+
+    }
+
+    private int getAddIdx(int[]nums){
+        for(int i=0;i<nums.length;i++){
+            if(nums[i]==0){
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Test
@@ -243,8 +259,7 @@ public class Sort {
             //pivot放到合适的位置
             a[low]=pivot;
 
-            show(a);
-            System.out.println();
+
         }
         //System.out.println(low);
 

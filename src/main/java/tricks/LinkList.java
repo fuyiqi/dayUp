@@ -200,9 +200,45 @@ public class LinkList {
      * @Description: 合并两个排序的链表
      */
     public LinkNode mergeTwoLists(LinkNode l1,LinkNode l2){
+        LinkNode cur1=l1.next;
+        LinkNode cur2=l2.next;
+        LinkNode res = new LinkNode();
+        LinkNode cur=res;
+        while (cur1.next!=null&&cur2.next!=null){
+            while(cur1.elem<=cur2.elem&&cur1.next!=null&&cur2.next!=null){
+                LinkNode tmp = new LinkNode(cur1.elem);
+                cur.next=tmp;cur=tmp;
+                cur1=cur1.next;
+            }
+            while(cur2.elem<cur1.elem&&cur1.next!=null&&cur2.next!=null){
+                LinkNode tmp = new LinkNode(cur2.elem);
+                cur.next=tmp;cur=tmp;
+                cur2=cur2.next;
+            }
+        }
 
 
-        return null;
+        if(cur1.next==null){
+            System.out.print(cur1.elem+"\t");
+            while (cur2!=null){
+                LinkNode tmp = new LinkNode(cur2.elem);
+                cur.next=tmp;cur=tmp;
+                cur2=cur2.next;
+            }
+
+        }else {
+            if(cur2.next==null){
+                System.out.print(cur2.elem+"\t");
+                while (cur1!=null){
+                    LinkNode tmp = new LinkNode(cur1.elem);
+                    cur.next=tmp;cur=tmp;
+                    cur1=cur1.next;
+                }
+            }
+
+        }
+
+        return res;
     }
 
 
@@ -227,13 +263,13 @@ public class LinkList {
 
     @Test
     public void t2(){
-        int[] a1={1,5,9};
+        int[] a1={1,5,9,290,301,489,560};
         int[] a2={2,99,100,101};
 
         LinkNode l1 = initByTail(a1);
         LinkNode l2 = initByTail(a2);
         LinkNode res = mergeTwoLists(l1,l2);
-
+        show(res);
 
     }
 
