@@ -1,7 +1,9 @@
-package tricks;
+package DataStructure;
 
 
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
 
 /**
  * @Description: 排升序
@@ -223,14 +225,7 @@ public class Sort {
 
     }
 
-    private int getAddIdx(int[]nums){
-        for(int i=0;i<nums.length;i++){
-            if(nums[i]==0){
-                return i;
-            }
-        }
-        return -1;
-    }
+
 
     @Test
     /**
@@ -263,20 +258,43 @@ public class Sort {
         }
         //System.out.println(low);
 
-
-
-
-
     }
 
 
+    /**
+     * @Description：最小k个数
+     */
+    public ArrayList<Integer> getLeastKNumber(int[] nums,int k){
+        ArrayList<Integer> res = new ArrayList<Integer>();
+        if(nums.length==0||nums.length<k||k<=0){
+           return res;
+        }
+        int low=0,high=nums.length-1;
+        int pivot_index=getPivotIndex(nums,low,high);
+        while (pivot_index!=k-1){
+            if(k-1<pivot_index){
+                pivot_index=getPivotIndex(nums,low,pivot_index-1);
+            }else {
+                if(pivot_index<k-1){
+                    pivot_index=getPivotIndex(nums,pivot_index+1,high);
+                }
+            }
+        }
+
+        for (int i =0;i<k;i++){
+            //System.out.print(nums[i]+"\t");
+            res.add(nums[i]);
+        }
+
+        return res;
+    }
 
 
-
-
-
-
-
+    @Test
+    private void test_leats(){
+        int[] a = {66,99,102,4,67,8};
+        getLeastKNumber(a,3);
+    }
 
 
 

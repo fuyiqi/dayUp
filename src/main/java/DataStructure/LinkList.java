@@ -1,4 +1,4 @@
-package tricks;
+package DataStructure;
 
 import org.testng.annotations.Test;
 
