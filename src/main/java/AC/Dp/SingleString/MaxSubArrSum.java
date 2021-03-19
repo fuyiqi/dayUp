@@ -11,7 +11,7 @@ public class MaxSubArrSum {
 
     /**
      * @Description：最大连续子数组和(dp)
-     *  f(n)=Max(f(n-1)+nums[n],nums[n])
+     *  @Idea: f(n)=Max(f(n-1)+nums[n],nums[n])
      *
      */
     private int MaxSubArrSum1(int[] nums){
