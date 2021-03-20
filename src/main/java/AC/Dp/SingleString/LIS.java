@@ -17,35 +17,41 @@ public class LIS {
     /**
      * @Idea: f(i)是以nums[i]结尾的元素的最长子序列长度
      * 同理可知f(i-1)是以nums[i-1]结尾的元素的最长子序列长度
-     * 当f(i-1)已知，推导f(i)的情况时，考虑到以nums[i-1]结尾的元素的最长子序列都是比nums[i-1]小的元素
-     * 求解这个序列的长度是在上述情况的组合中找到最大值作为f(i-1)的值
+     以nums[i]结尾的元素的最长子序列中都是比nums[i]小的元素个数<此处是正推>，则f(i)在此基础加1即可
      */
-    public int lengthOfLIS(int[] nums) {
-        int[] f= new int[nums.length];
-        int cnt=0;
-        for(int i = 1;i<nums.length;i++){
-            cnt=0;
-            for(int j=i-1;j>=0;j--){
-                if(nums[j]<nums[i]){
-                    cnt++;
+    public int lengthOfLIS_dp(int[] nums) {
+        int[] f= new int[nums.length];f[0]=1;
+        for(int i = 0;i<nums.length;i++){
+            // 当前下标i的最大递增序列长度
+            int currentMax = 0;
+            for(int j=0;j<i;j++){
+                if(nums[j]<nums[i]){//位置在i之前的元素，比nums[i]小即可成为递增子序列
+                    currentMax = Math.max(currentMax, f[j]);
                 }
             }
-            System.out.println("以nums["+i+"]="+nums[i]+"结尾的元素的序列中，比该元素值小的个数="+cnt);
+            // 加上当前的数
+            f[i] = currentMax + 1;
         }
 
-
-
-        return 0;
+        int maxV = f[0];
+        for(int i=1;i<f.length;i++){
+            if(maxV<f[i]){
+                maxV=f[i];
+            }
+        }
+        //System.out.println(maxV);
+        return maxV;
     }
 
 
 
     @Test
     public void test(){
+        int[]a={1,6,4,2,3,9,8};//4
         int[] a1={10,9,2,5,3,7,101,18};//4
         int[] a2={0,1,0,3,2,3};//4
         int[] a3={7,7,7,7,7};//1
-        lengthOfLIS(a1);
+        lengthOfLIS_dp(a1);
     }
 
 
