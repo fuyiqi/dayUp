@@ -57,7 +57,7 @@ public class Tricks {
         return Math.min(f[cost.length-1],f[cost.length-2]);
     }
 
-
+    
     public List<String> findRepeatedDnaSequences(String s) {//限定10
         int windowLength=10;
         int low=0,len=s.length();
