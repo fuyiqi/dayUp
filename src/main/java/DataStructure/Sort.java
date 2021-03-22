@@ -143,11 +143,33 @@ public class Sort {
  /*#*#*#*#*#*#*#*#*#*#*/
 
     /**
-     * @Description: 堆排序
+     * @Description: 堆排升序
+     * 具有完全二叉树的小顶堆，它的每一个节点i，其值不大于它的左子节点(2i+1)的值和右子节点(2i+2)的值，
+     * 它的最后一个非叶子节点n/2-1
      * **/
     private void heapSort(int[] nums){
+        //初始化阶段--将数组调整为小顶堆
+        int last_non_leaf=nums.length>>1-1;
+        for(int i=last_non_leaf;i>=0;i--){
+
+        }
+    }
+
+    /**
+     * 调整数组为符合小顶堆结构
+     * 由下至上，从右到左的调整
+     * @param nums 数组头指针
+     * @param non_leaf 非叶子节点
+     * @param len 调整的数组区间长度
+     */
+    private void adjustHeap(int[] nums,int non_leaf,int len){
+        int tmp = nums[non_leaf];
+        for(int i=non_leaf<<1+1;i<len;i=i<<1+1){//该节点的左子节点开始
+            //TODO
+        }
 
     }
+
 
     /**
      * @Description: 希尔排序
@@ -164,9 +186,11 @@ public class Sort {
         //bubbleSort1_1(a2);
         //bubbleSort1_2(a2);
         //insertSort(a2);
-        quickSort(a2,0,5);
+        //quickSort(a2,0,5);
+        int[] a={4,6,8,5,9};
+        heapSort(a);
         System.out.println("\n =====排序后======");
-        show(a2);
+
 
     }
 

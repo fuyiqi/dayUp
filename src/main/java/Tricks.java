@@ -106,7 +106,12 @@ public class Tricks {
         return i-j;
     }
 
+    public String longestCommonPrefix(String[] strs) {
 
+
+
+        return "";
+    }
 
 
     @Test
@@ -123,7 +128,12 @@ public class Tricks {
         String s2="AAAAAAAAAAAAA";
         //findRepeatedDnaSequences(s2);
         String p1="1011";String t1="1001001100";
-        BruceMatch1(p1,t1);
+        //BruceMatch1(p1,t1);
+
+
+
+
+
     }
 
 
