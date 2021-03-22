@@ -46,14 +46,14 @@ public class Sort {
 
     /**
      * @Description: 冒泡排升序
-     * 第i次遍历的时候通过两两比较将大数沉底找到第n-i大的数并放在数组第n-i的位置上
+     * 第i次遍历的时候通过两两比较将大数沉底找到第n-i-1大的数并放在数组第n-i-1的位置上
      * **/
     private void bubbleSort1_1(int[] nums){
         int nums_len = nums.length;
         for(int i=0;i<nums_len;i++){
-            for(int j=0;j<nums_len;j++){
-                if(nums[i]<nums[j])//出现后面比前面数值大的逆序对情况
-                    swap(nums,i,j);
+            for(int j=0;j<nums_len-1-i;j++){//n-i-1的位置已有序
+                if(nums[j+1]<nums[j])//出现前面比后面数值大的逆序对情况
+                    swap(nums,j,j+1);
             }
         }
     }
@@ -94,8 +94,8 @@ public class Sort {
      * 第i次的迭代可以通过两两比较的方式将nums[i]插入到有序部分的合适位置上
      * **/
     private void insertSort(int[] nums){
-        int low=0;int nums_len=nums.length;
-        while (++low<nums_len){
+        int low=0;int nums_len=nums.length-1;
+        while (++low<=nums_len){
             int findPos = low;
             while (findPos>=1&&nums[findPos]<nums[findPos-1]){//通过逆序对由后向前找位置
                swap(nums,findPos-1,findPos);
@@ -183,14 +183,14 @@ public class Sort {
         int[]a2={10,11,13,14,15,12};
         /**排序**/
         //selectSort(a2);
-        //bubbleSort1_1(a2);
+        bubbleSort1_1(a2);
         //bubbleSort1_2(a2);
         //insertSort(a2);
         //quickSort(a2,0,5);
         int[] a={4,6,8,5,9};
-        heapSort(a);
+        //heapSort(a);
         System.out.println("\n =====排序后======");
-
+        show(a2);
 
     }
 

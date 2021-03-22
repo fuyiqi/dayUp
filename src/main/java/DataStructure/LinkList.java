@@ -244,7 +244,11 @@ public class LinkList {
 
 
 
+    private LinkList getIntersectionNode(){
 
+
+        return null;
+    }
 
 
 

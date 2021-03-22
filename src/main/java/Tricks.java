@@ -106,13 +106,62 @@ public class Tricks {
         return i-j;
     }
 
-    public String longestCommonPrefix(String[] strs) {
+    /**
+     * 输入数字 n，按顺序打印出从 1 到最大的 n 位十进制数。比如输入 3，则打印出 1、2、3 一直到最大的 3 位数 999。
+     */
+    public int[] printNumbers(int n) {
+        int maxNum=1;
+        for(int i=0;i<n;i++){
+            maxNum=maxNum*10;
+        }
 
+        if(maxNum<=0){
+            return null;
+        }
+        int len=maxNum-1;int[] nums=new int[len];
+        for(int i=0;i<len;i++){
+            nums[i]=i+1;
+        }
 
-
-        return "";
+        return nums;
     }
 
+    /**
+     * 输入一个递增排序的数组和一个数字s，在数组中查找两个数，使得它们的和正好是s。如果有多对数字的和等于s，则输出任意一对即可。
+     */
+    public int[] twoSum(int[] nums, int target) {
+        for(int i=0;i<nums.length;i++){
+            int supposed = target-nums[i];
+            int supposed_idx = binarySearch(nums,i+1,nums.length-1,supposed);
+            if(supposed_idx==-1){
+                continue;
+            }else {
+                System.out.print(nums[i]+","+supposed);
+                return new int[]{nums[i], supposed};
+            }
+        }
+        return null;
+    }
+
+    public int binarySearch(int[]nums,int low,int high,int target){//-1是没找到
+
+        while (low<=high){
+           int mid=(low+high)>>1;
+           if(nums[mid]==target){
+               //System.out.print(mid);
+               return mid;
+           } else {
+               if(nums[mid]<target){
+                   low++;
+               }else {
+                   if(target<nums[mid]){
+                       high--;
+                   }
+               }
+           }
+        }
+        return -1;
+    }
 
     @Test
     public void test(){
@@ -122,14 +171,17 @@ public class Tricks {
         int[] a2={1, 100, 1, 1, 1, 100, 1, 1, 100, 1};//6
         int[] a3={0,0,1,1};
         //minCostClimbingStairs(a3);
+        int[] nums1={2,7,11,15};int target1=9;
+        int[] nums2={10,26,30,31,47,60};int target2=40;
 
+        twoSum(nums1,target1);
 /*********************************************************/
         String s1="AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT";
         String s2="AAAAAAAAAAAAA";
         //findRepeatedDnaSequences(s2);
         String p1="1011";String t1="1001001100";
         //BruceMatch1(p1,t1);
-
+        //printNumbers(2);
 
 
 
