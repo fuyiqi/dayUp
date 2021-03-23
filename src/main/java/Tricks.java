@@ -129,7 +129,7 @@ public class Tricks {
     /**
      * 输入一个递增排序的数组和一个数字s，在数组中查找两个数，使得它们的和正好是s。如果有多对数字的和等于s，则输出任意一对即可。
      */
-    public int[] twoSum(int[] nums, int target) {
+    public int[] twoSum(int[] nums, int target) {//实现了功能，但超时
         for(int i=0;i<nums.length;i++){
             int supposed = target-nums[i];
             int supposed_idx = binarySearch(nums,i+1,nums.length-1,supposed);
@@ -163,32 +163,89 @@ public class Tricks {
         return -1;
     }
 
+
+    /**
+     * 输入一个正整数 target ，输出所有和为 target 的连续正整数序列（至少含有两个数）。
+     * 序列内的数字由小到大排列，不同序列按照首个数字从小到大排列。
+     *
+     */
+    public int[][] findContinuousSequence(int target) {
+        //TODO
+
+        return null;
+    }
+
+
+    /**
+     * 输入一个矩阵，按照从外向里以顺时针的顺序依次打印出每一个数字。
+     */
+    public int[] spiralOrder(int[][] matrix) {
+        int row_border = matrix.length-1;int row=0;
+        int col_border = matrix[0].length-1;int col=0;
+        int res_border =(row_border+1)*(col_border+1);
+        int[] res=new int[res_border];
+        int cnt=0;
+        while (row<=row_border&&col<=col_border){
+            //to right
+            for(int c = col;c<=col_border;c++){
+                System.out.print(matrix[row][c]+"\t");
+                //res[cnt++]=matrix[row][c];
+            }
+            //to down
+            for(int r=row+1;r<=row_border;r++){
+                System.out.print(matrix[r][col_border]+"\t");
+                //res[cnt++]=matrix[r][col_border];
+            }
+            if(row<row_border&&col<col_border){
+                //to left
+                for (int c=col_border-1;c>col;c--){
+                    System.out.print(matrix[row_border][c]+"\t");
+                    //res[cnt++]=matrix[row_border][c];
+                }
+                //to up
+                for(int r=row_border;r>row;r--){
+                    System.out.print(matrix[r][col]+"\t");
+                    //res[cnt++]=matrix[r][col];
+                }
+            }
+            row++;
+            row_border--;
+            col++;
+            col_border--;
+        }
+
+        return res;
+    }
+
+
+
+
     @Test
-    public void test(){
+    public void test_int(){
         //fib(4);
         //tribonacci(25);
         int[] a1={10, 15, 20};//15
         int[] a2={1, 100, 1, 1, 1, 100, 1, 1, 100, 1};//6
         int[] a3={0,0,1,1};
         //minCostClimbingStairs(a3);
-        int[] nums1={2,7,11,15};int target1=9;
+        int[] nums1={2,7,11,15};int target1=10;
         int[] nums2={10,26,30,31,47,60};int target2=40;
+        //twoSum(nums1,target1);
+        int[][]m1={{1,2,3},{4,5,6},{7,8,9}};
+        int[][]m2={{1,2,3,4},{5,6,7,8},{9,10,11,12}};
+        spiralOrder(m2);
 
-        twoSum(nums1,target1);
-/*********************************************************/
+    }
+
+    @Test
+    public void test_string(){
         String s1="AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT";
         String s2="AAAAAAAAAAAAA";
         //findRepeatedDnaSequences(s2);
         String p1="1011";String t1="1001001100";
         //BruceMatch1(p1,t1);
         //printNumbers(2);
-
-
-
-
     }
-
-
 
 
 }
