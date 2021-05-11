@@ -2,5 +2,3 @@ A模式
     使用synchronized、wait和notify
 B模式
     使用lock和condition的await、signalAll
-C模式
-    使用阻塞队列BlockingQueue

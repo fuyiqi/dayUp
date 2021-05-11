@@ -70,10 +70,6 @@ class LineResource{
 
 }
 
-class CircleResource{
-
-}
-
 
 /**
  * 消费者线程
@@ -87,7 +83,7 @@ class MyConsumerA extends Thread{
     public void run(){
         while (true){
             try {
-                Thread.sleep(1000);
+                Thread.sleep((long) (1000 * Math.random()));
             }catch (Exception e){
                 System.out.println("Exception,"+e);
             }
@@ -111,7 +107,7 @@ class MyProducerA extends Thread{
     public void run(){
         while (true){
             try {
-                Thread.sleep(1000);
+                Thread.sleep((long) (1000 * Math.random()));
             }catch (Exception e){
                 System.out.println("Exception,"+e);
             }
