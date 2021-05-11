@@ -10,13 +10,13 @@ public class Simple {
         /*************************************/
         Resource r1 = new Resource();
 
-        ProducerA pa1 = new ProducerA(r1);
-        ProducerA pa2 = new ProducerA(r1);
-        ProducerA pa3 = new ProducerA(r1);
+        Thread pa1 = new Thread(new ProducerA(r1));
+        Thread pa2 = new Thread(new ProducerA(r1));
 
-        ConsumerA ca1 = new ConsumerA(r1);
 
-        pa1.start();pa2.start();pa3.start();
+        Thread ca1 = new Thread(new ConsumerA(r1));
+
+        pa1.start();pa2.start();
         ca1.start();
         /*************************************/
 
@@ -39,12 +39,12 @@ class Resource{
     public synchronized void remove(){
         if(this.currrentNum>0){
             currrentNum--;
-            System.out.println("消费者:"+Thread.currentThread().getName()+"消费了一件资源，当前资源还有"+this.currrentNum);
+            System.out.println("消费者:"+Thread.currentThread().getName()+"消费了一件资源，当前资源数量："+this.currrentNum);
             notifyAll();//通知生产者去生产
         }else {
             try{
                 wait();
-                System.out.println("消费者:"+Thread.currentThread().getName()+"无资源可消费，进入等待状态");
+                System.out.println("资源池已空，消费者:"+Thread.currentThread().getName()+"进入等待状态");
             }catch(Exception e){
                 System.out.println("Exception,"+e);
             }
@@ -55,7 +55,7 @@ class Resource{
     public synchronized void add(){
         if(this.currrentNum<this.capacity){
             currrentNum++;
-            System.out.println("生产者:"+Thread.currentThread().getName()+"生产了一件资源，当前资源还有"+this.currrentNum);
+            System.out.println("生产者:"+Thread.currentThread().getName()+"生产了一件资源，当前资源数量："+this.currrentNum);
             notifyAll();//通知消费者去消费
         }else {
             try{
