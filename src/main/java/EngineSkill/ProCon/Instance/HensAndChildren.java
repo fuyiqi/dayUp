@@ -39,7 +39,6 @@ class Hens extends Thread{
                 Thread.sleep((long) (1000*Math.random()));
                 bracket.put(randomEgg());
             }catch (Exception e){
-
             }
         }
     }
