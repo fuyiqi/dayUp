@@ -1,0 +1,11 @@
+//包头
+package rules
+//引用类
+import EngineSkill.Drools.Entity.Alert;
+//规则实体
+rule "multi-Alert match"
+    when
+        $alert1: Alert(getAlertStatus()<7)
+    then
+        System.out.println("Matched Fact is "+$alert1);//drools.getRule().getName() //获取匹配的规则名
+end
