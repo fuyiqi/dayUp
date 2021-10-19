@@ -1,0 +1,11 @@
+//包头
+package trigger_rules
+dialect "java"
+//引用类
+import EngineSkill.Drools.Entity.Alert;
+rule "03" extends "02"
+    when
+
+    then
+
+end
