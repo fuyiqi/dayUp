@@ -18,5 +18,7 @@ public class Main {
         kfk.get_at_most_once("");
     }
 
+    public static void main(String[] args){
 
+    }
 }
