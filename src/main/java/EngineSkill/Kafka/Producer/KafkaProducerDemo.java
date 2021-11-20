@@ -55,9 +55,6 @@ public class KafkaProducerDemo {
             producer.send(record);
         }catch (Exception e){
             logger.error("",e);
-        }finally {
-            //producer.flush();
-            //producer.close();
         }
     }
 
@@ -86,9 +83,6 @@ public class KafkaProducerDemo {
             });
         }catch (Exception e){
             logger.error("",e);
-        }finally {
-            //producer.flush();
-            //producer.close();
         }
     }
 
@@ -109,9 +103,6 @@ public class KafkaProducerDemo {
             }
         } catch (Exception e) {
             logger.error("", e);
-        } finally {
-            //producer.flush();
-            //producer.close();
         }
 
     }

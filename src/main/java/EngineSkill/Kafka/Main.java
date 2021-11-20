@@ -4,11 +4,17 @@ import EngineSkill.Kafka.Consumer.KafkaConsumerDemo;
 import EngineSkill.Kafka.Producer.KafkaProducerDemo;
 import org.testng.annotations.Test;
 
+import java.util.concurrent.TimeUnit;
+
 public class Main {
     @Test
-    public void test_producer(){
+    public void test_producer() throws InterruptedException {
         KafkaProducerDemo kfk = KafkaProducerDemo.getInstance();
-        kfk.send_sync("","fff");
+        while(true){
+            TimeUnit.SECONDS.sleep(1);
+            kfk.send_async("","fff");
+        }
+
     }
 
 
