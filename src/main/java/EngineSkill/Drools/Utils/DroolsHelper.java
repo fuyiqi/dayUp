@@ -38,14 +38,14 @@ public class DroolsHelper {
         return Holer._instance;
     }
 
-    public KieSession add_rule(String content,String name){
+    public void add_rule(String content,String name){
         kieHelper.addContent(content,name);
 
         Results pre_build = kieHelper.verify();
         if(pre_build.hasMessages(Message.Level.ERROR)){
             String error_msg = pre_build.getMessages(Message.Level.ERROR).toString();
             System.out.println(error_msg);
-            return null;
+            return ;
         }
         kieBase  = kieHelper.build();
 
@@ -57,12 +57,9 @@ public class DroolsHelper {
             }
         }*/
 
-
-
-        return kieBase.newKieSession();
     }
 
-    public KieSession add_rule_list(Map<String,String> ruleInfo_list){
+    public void add_rule_list(Map<String,String> ruleInfo_list){
         for(Map.Entry<String,String> entry:ruleInfo_list.entrySet()){
             String content = entry.getValue();
             String name = entry.getKey();
@@ -73,44 +70,14 @@ public class DroolsHelper {
         if(pre_build.hasMessages(Message.Level.ERROR)){
             String error_msg = pre_build.getMessages(Message.Level.ERROR).toString();
             System.out.println(error_msg);
-            return null;
+            return ;
         }
         kieBase  = kieHelper.build();
 
-/*        System.out.println("kieBase.getKiePackages().size()=>"+kieBase.getKiePackages().size());
-        for(KiePackage kiePackage : kieBase.getKiePackages()){
-            System.out.println("kiePackage.getRules().size()=>"+kiePackage.getRules().size());
-            for(Rule rule:kiePackage.getRules()){
-                System.out.println(rule.getName());
-            }
-        }*/
-
-        return kieBase.newKieSession();
+        return ;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /**获取匹配会话的句柄**/
     public KieSession getKieSession(){
         return kieBase.newKieSession();
     }

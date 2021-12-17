@@ -3,9 +3,9 @@ package trigger_rules
 dialect "java"
 //引用类
 import EngineSkill.Drools.Entity.Alert;
-rule "02" extends "01"
+rule "01"
     when
-        $alert2: Alert(getTitle() contains "h")
+        $alert1: Alert(getTitle() contains "h")
     then
 
 end

@@ -19,6 +19,7 @@ import org.kie.api.runtime.rule.Match;
 import org.kie.internal.conf.MultithreadEvaluationOption;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 
@@ -124,12 +125,12 @@ public class DroolsEngine extends CommonConstants{
     }
 
 
-    public void loadRuleList(List<String> ruleContent_list){
-        for(String ruleContent:ruleContent_list){
+    public void loadRuleList(Map<String,String> ruleInfo_list){
+        for(Map.Entry<String,String> entry:ruleInfo_list.entrySet()){
             //获取规则文件的文件名
-            String ruleName = String.valueOf(new Random().nextInt());
-            String rule_path = CommonConstants.SCRIPT_RULE_KIE_PATH_PREFIX+ruleName+".drl";
-            kieFileSystem.write(rule_path,
+            String ruleName = entry.getKey();
+            String ruleContent = entry.getValue();
+            kieFileSystem.write(ruleName,
                     ruleContent);
         }
 
@@ -150,25 +151,7 @@ public class DroolsEngine extends CommonConstants{
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /**获取drools匹配的会话句柄**/
     public KieSession getKieSession(){
         return kieBaseMap.get(CommonConstants.kieBaseMap_key).newKieSession();
     }

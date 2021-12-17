@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,62 +80,20 @@ public class CommonConstants {
         return res;
     }
 
-
-
-
-    @Test
-    public void Test_readFileContent(){
-        String filePath = SCRIPT_RULE_KIE_PATH_PREFIX+"rule.drl";
-        System.out.println(readFileContent(filePath,"UTF8"));
+    /*
+     * 读取文件夹中的规则内容,以规则名为key，内容为value
+     * @param dir_path
+     * @return
+     */
+    public static Map<String,String> getRuleInfoList(String dir_path){
+        Map<String,String> res = new HashMap<>();
+        List<String> name_list = readFileNames_On_OneDir(dir_path);
+        for(String name:name_list){
+            String content = CommonConstants.readFileContent(name,"UTF8");
+            res.put(name,content);
+        }
+        return res;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /******多告警匹配语法【无法匹配的版本】******/
-    public static String AlertRule(){
-        String drl_str= "package rules\r\n"
-                + "import EngineSkill.Drools.Entity.Alert; \r\n"
-                + "rule \"rule-MultiAlert\"\r\n"
-                + "\twhen\r\n"
-                + "\t\t$alert1: Alert(getAlertStatus()<7) \r\n"
-                + "\t\t$alert2: Alert(getText() contains \" aaa \") \r\n"
-                + "\tthen\r\n"
-                + "\t\tSystem.out.println(\"Matched Fact is \"+$alert1);\n"
-                + "end\r\n"
-                ;
-        return drl_str;
-    }
-
-
-    /*****随机生成告警对象*****/
-    public Alert randomAlert(){
-
-
-        return null;
-    }
-
-
-
-
-
-
-
 
 
 
