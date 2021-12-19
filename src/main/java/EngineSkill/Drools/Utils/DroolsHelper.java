@@ -14,10 +14,7 @@ import org.kie.internal.utils.KieHelper;
 
 import java.util.Map;
 
-/**
- * 01.drl.动态更新规则
- * 02.drl.动态匹配
- */
+
 public class DroolsHelper {
     private static KieHelper kieHelper;
     private static KieBase kieBase;
@@ -30,12 +27,12 @@ public class DroolsHelper {
         return kieBase;
     }
 
-    private static class Holer{
+    private static class Holder{
         private static final DroolsHelper _instance = new DroolsHelper();
     }
 
     public static DroolsHelper getInstance(){
-        return Holer._instance;
+        return Holder._instance;
     }
 
     public void add_rule(String content,String name){
