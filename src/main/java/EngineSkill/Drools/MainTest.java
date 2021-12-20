@@ -29,7 +29,7 @@ public class MainTest {
         //初始化引擎
         DroolsHelper droolsHelper = DroolsHelper.getInstance();
         //读取规则内容
-        Map<String,String> ruleInfo_list = CommonConstants.getRuleInfoList(CommonConstants.SCRIPT_RULE_KIE_PATH_PREFIX+"trigger_rules");
+        Map<String,String> ruleInfo_list = CommonConstants.getRuleInfoList(CommonConstants.SCRIPT_RULE_KIE_PATH_PREFIX+"h");
         //引擎加载内容至内存
         droolsHelper.add_rule_list(ruleInfo_list);
         //拿到已有规则内容的引擎的匹配会话句柄
@@ -38,11 +38,12 @@ public class MainTest {
             System.out.println("ERROR, kieSession is null");
             return;
         }
-        spy_ruleContents_on_drools(ks);
+        //spy_ruleContents_on_drools(ks);
+        List<String> list = new ArrayList<>();
+        list.add("8");
+        ks.insert(list);
+        droolsHelper.runKieSession(ks);
 
-/*        Alert a1 = new Alert("hh","thryu",6,"19.2.3.4");
-        ks.insert(a1);
-        droolsHelper.runKieSession(ks);*/
 
 
     }

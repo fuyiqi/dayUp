@@ -5,11 +5,16 @@ dialect "java"
 import EngineSkill.Drools.Entity.Alert;
 import java.util.*;
 
+function Boolean judge(List list1){
+    for()
+    return true;
+}
 
 rule "01"
     when
-        //$alert1: Alert(getTitle() contains "h")
-        $list1:List(this contains "8")
+
+        //$list1:List(this contains "8")
+        $list1:List(judge(this))
     then
 
 end
