@@ -1,10 +1,9 @@
 package EngineSkill.Drools.Utils;
 
-import EngineSkill.Drools.Entity.Alert;
 import org.drools.core.impl.KnowledgeBaseImpl;
 import org.kie.api.KieBase;
 import org.kie.api.runtime.KieContainer;
-import org.testng.annotations.Test;
+
 
 
 import java.io.BufferedReader;
@@ -41,6 +40,7 @@ public class CommonConstants {
     public static final String SCRIPT_RULE_PATTERNEXPRESSION_KEY = "patternExpression";
     public static final String SCRIPT_RULE_ALERTSTATUS_KEY = "alertStatus";
 
+    public static final String defaultKiePackageName = "java.util";
     /***读取文本***/
     public static String readFileContent(String filePath,String fileEnCoding){
         StringBuilder sb = new StringBuilder();

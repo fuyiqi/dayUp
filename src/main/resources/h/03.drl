@@ -1,0 +1,26 @@
+//包头
+package h
+dialect "java"
+//引用类
+import java.util.*;
+
+function Boolean judge3(List list1){
+    for(Object e :list1){
+        if(e instanceof String){
+            String elem = String.valueOf(e);
+            if(elem.contains("10")){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+rule "03"
+    when
+        $list1:List(judge3(this))
+    then
+
+end
+
+
