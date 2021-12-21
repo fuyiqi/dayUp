@@ -12,6 +12,7 @@ import org.kie.api.definition.rule.Rule;
 import org.kie.api.runtime.KieSession;
 import org.kie.internal.utils.KieHelper;
 
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -87,12 +88,15 @@ public class DroolsHelper {
     /**
      * 获取运行态时working memory中的规则文件
      */
-    public void getRuleFileNames_onRuntime() {
+    public Map<String,String> getRuleFileNames_onRuntime() {
+        Map<String,String> res = new HashMap<>();
         MemoryFileSystem mfs = this.kfs.getMfs();
-        String[] drlNames_onRuntime = mfs.getFileNames().toArray(new String[0]);
-        for(String fileName:drlNames_onRuntime){
-            //System.out.println(fileName);
-        }
+         for(Map.Entry<String,byte[]> entrySet:mfs.getMap().entrySet()){
+            String drlPathName = entrySet.getKey();
+            String drlContent = new String(entrySet.getValue());
+            res.put(drlPathName,drlContent);
+         }
+        return res;
     }
 
 
