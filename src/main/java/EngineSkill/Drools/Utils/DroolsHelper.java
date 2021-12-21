@@ -139,7 +139,7 @@ public class DroolsHelper {
         }
         finally {
             if(null != kieSession){
-                //kieSession.dispose();
+                kieSession.dispose();
             }
         }
         return matchNum;

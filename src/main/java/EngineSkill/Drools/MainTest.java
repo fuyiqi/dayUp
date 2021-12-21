@@ -39,15 +39,18 @@ public class MainTest {
             System.out.println("ERROR, kieSession is null");
             return;
         }
-        droolsHelper.getRuleFileNames_onRuntime();
+        //droolsHelper.getRuleFileNames_onRuntime();
         //待匹配的事实插入working memory
         List list = getFact();
-        //ks.insert(list);
+        ks.insert(list);
         //匹配
         droolsHelper.runMatch(ks);
         droolsHelper.remove_rule("01.drl");
-        droolsHelper.getRuleFileNames_onRuntime();
-
+        //droolsHelper.getRuleFileNames_onRuntime();
+        ks = droolsHelper.getKieSession();
+        ks.insert(list);
+        //匹配
+        droolsHelper.runMatch(ks);
     }
 
 
