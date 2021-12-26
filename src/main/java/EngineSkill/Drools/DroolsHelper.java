@@ -1,4 +1,4 @@
-package EngineSkill.Drools.Utils;
+package EngineSkill.Drools;
 
 
 

@@ -1,4 +1,4 @@
-package EngineSkill.Drools.Utils;
+package EngineSkill.Drools;
 
 import org.drools.core.impl.KnowledgeBaseImpl;
 import org.kie.api.KieBase;
