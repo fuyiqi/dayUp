@@ -1,8 +1,7 @@
 package EngineSkill.Drools;
 
 
-import EngineSkill.Drools.CommonConstants;
-import EngineSkill.Drools.DroolsHelper;
+
 import org.kie.api.runtime.KieSession;
 
 import org.testng.annotations.Test;
@@ -59,6 +58,9 @@ public class MainTest {
 
 
  public static void main (String[] args){
+
+
+
 
  }
 
