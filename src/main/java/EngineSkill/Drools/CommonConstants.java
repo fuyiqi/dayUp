@@ -34,7 +34,7 @@ public class CommonConstants {
     public static final String packagesName = "rules";
 
     public static final String SCRIPT_TEMPLATE_KEY = "ruleScriptTempalte";
-    public static final String SCRIPT_RULE_KIE_PATH_PREFIX = "src/main/resources/";
+    public static final String SCRIPT_RULE_KIE_PATH_PREFIX = "src/main/resources";
     public static final String SCRIPT_RULE_NAME_KEY = "ruleName";
     public static final String SCRIPT_RULE_AGENDAGROUP_KEY = "agendaGroup";
     public static final String SCRIPT_RULE_PATTERNEXPRESSION_KEY = "patternExpression";
