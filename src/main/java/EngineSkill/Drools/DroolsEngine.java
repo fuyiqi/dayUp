@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class DroolsEngine {
@@ -27,19 +30,20 @@ public class DroolsEngine {
     private KieBase kieBase;
 
     //测试所用变量
-    public String engineName = "default";
+    private String engineName = "default";
     //测试所用的析构方法
     private DroolsEngine(String enginename){
         engineName = enginename;
     }
-
+    //是否要编译的标志【kfs有变动就要编译，获取完kieContainer就不用】
+    private boolean needBuildFlag;
+    private static Lock lock = new ReentrantLock();
+    private static Condition condition = lock.newCondition();
 
     /**嵌套模式的单例
      * 线程安全
      * **/
-    private DroolsEngine(){
-
-    }
+    private DroolsEngine(){}
 
     private static class Holder{
         private static DroolsEngine _instance = new DroolsEngine();
@@ -69,9 +73,21 @@ public class DroolsEngine {
      * 编译
      */
     public void prepareEngine(){
-        kieContainer = (KieContainerImpl)getKieContainer();
-        kieBase = kieContainer.getKieBase();
-        valid_in_kfs_and_kiebase();
+        lock.lock();
+        try{
+            if(needBuildFlag){
+                kieContainer = (KieContainerImpl)getKieContainer();
+                kieBase = kieContainer.getKieBase();
+                valid_in_kfs_and_kiebase();
+            }else{
+                condition.await();
+            }
+        }catch (Exception e){
+            log.error("Compile Exception->",e);
+        }finally {
+            lock.unlock();
+        }
+
     }
 
     /**
@@ -100,9 +116,9 @@ public class DroolsEngine {
     public void addDRLs(String content,String drlname){
         if(content!=null && !"".equals(content.trim())){
             String kieFilePath = "src/main/resources/" + drlname;
-            kfs.delete(kieFilePath);
+            //kfs.delete(kieFilePath);
             kfs.write(kieFilePath, content);
-            log.info("[{} DB to KFS]add rule>>{} ",this.engineName,drlname);
+            log.info("[{} insert to KFS]add rule>>{} ",this.engineName,drlname);
         }
     }
 
@@ -195,69 +211,62 @@ public class DroolsEngine {
 
 
 
-    /***************************功能测试***************************************/
+/***************************功能测试***************************************/
     public static void main(String[] args){
-        //new ParallelCountDownLatch().doCountDownLatch();
-        new ParallelCyclicBarrier().doCyclicBarrier();
+        new ParallelMyTool().doParallel();
+        //new ParallelMyTool().doSingleton();
     }
 
-    /**
-     * 使用CountDownLatch实现的并行类
-     * CountDownLatch 基于 AQS 的共享模式的使用
-     */
-    static class ParallelCountDownLatch{
+    /*=*==*==*==*==*==*==*==*=模拟并发*=*==*==*==*==*==*==*==*=*/
 
-        private void doCountDownLatch(){
+    /**
+     * 使用多线程的并发类
+     */
+    static class ParallelMyTool{
+
+        private void doParallel(){
             int parallelismNum = 2;
-            CountDownLatch countDownLatch = new CountDownLatch(parallelismNum);
             for(int i=0;i<parallelismNum;i++){
                 new Thread(()->{
                     String engineName = RandomStringUtils.randomAlphanumeric(2);
                     DroolsEngine droolsEngine =  new DroolsEngine(engineName);
                     log.info("{}{}",engineName,"初始化drl文件内容");
-                    Map<String,String> drls = createDrlContents(5,engineName);
+                    Map<String,String> drls = createDrlContents(5,droolsEngine.engineName);
                     log.info("{}{}",engineName,"将drl文件内容添加到drools引擎的kfs中");
                     droolsEngine.add_drlContent_list(drls);
-                    log.info("{}{}",engineName,"将drools引擎kfs中的规则进行编译");
+                    droolsEngine.needBuildFlag = true;
+                    log.info("{}待编译标志->{}：待编译，kfs资源状态为新",droolsEngine.engineName,droolsEngine.needBuildFlag);
+                    log.info("{}{}",droolsEngine.engineName,"将drools引擎kfs中的规则进行编译");
                     droolsEngine.prepareEngine();
-                    countDownLatch.countDown();
+                    droolsEngine.needBuildFlag = false;
+                    log.info("{}待编译标志->{}：已编译，kfs资源状态为旧",droolsEngine.engineName,droolsEngine.needBuildFlag);
                 }).start();
             }
-            try{
-                countDownLatch.await();
-            }catch (Exception e){
-                log.error("Exception -> {}",e);
-            }
-
         }
-    }
 
-    /**
-     * 使用CyclicBarrier实现的并行类
-     * 基于 Condition 来实现的
-     */
-    static class ParallelCyclicBarrier{
-        private void doCyclicBarrier(){
+        private void doSingleton(){//单例的时候各种上锁会有问题
             int parallelismNum = 2;
-            CyclicBarrier cyclicBarrier = new CyclicBarrier(parallelismNum);
             for(int i=0;i<parallelismNum;i++){
                 new Thread(()->{
-                    try{
-                        String engineName = RandomStringUtils.randomAlphanumeric(2);
-                        DroolsEngine droolsEngine =  new DroolsEngine(engineName);
-                        log.info("{}{}",engineName,"初始化drl文件内容");
-                        Map<String,String> drls = createDrlContents(5,engineName);
-                        log.info("{}{}",engineName,"将drl文件内容添加到drools引擎的kfs中");
-                        droolsEngine.add_drlContent_list(drls);
-                        log.info("{}{}",engineName,"将drools引擎kfs中的规则进行编译");
-                        droolsEngine.prepareEngine();
-                    }catch (Exception e){
-                        log.error("Exception -> {}",e);
-                    }
+                    DroolsEngine droolsEngine =  DroolsEngine.getInstance();
+                    log.info("{}{}",droolsEngine.engineName,"初始化drl文件内容");
+                    String randomStr = RandomStringUtils.randomAlphanumeric(2);
+                    Map<String,String> drls = createDrlContents(5,droolsEngine.engineName,randomStr);
+                    log.info("{}{}",droolsEngine.engineName,"将drl文件内容添加到drools引擎的kfs中");
+                    droolsEngine.add_drlContent_list(drls);
+                    droolsEngine.needBuildFlag = true;
+                    log.info("{}待编译标志->{}：待编译，kfs资源状态为新",droolsEngine.engineName,droolsEngine.needBuildFlag);
+                    log.info("{}{}",droolsEngine.engineName,"将drools引擎kfs中的规则进行编译");
+                    droolsEngine.prepareEngine();
+                    droolsEngine.needBuildFlag = false;
+                    log.info("{}待编译标志->{}：已编译，kfs资源状态为旧",droolsEngine.engineName,droolsEngine.needBuildFlag);
                 }).start();
             }
         }
+
     }
+
+
 
 
 
@@ -302,7 +311,7 @@ public class DroolsEngine {
                 + "dialect \"java\" \n"
                 + "//引用类 \n"
                 + "import java.util.*;\n"
-                + "function Boolean judge{name}(List list1){ \n"
+                + "function Boolean judge{engineName}{name}(List list1){ \n"
                 + " for(Object e :list1){ \n"
                 + " if(e instanceof String){ \n"
                 + " String elem = String.valueOf(e); \n"
@@ -313,9 +322,9 @@ public class DroolsEngine {
                 + " } \n"
                 + " return false; \n"
                 + "}\n"
-                + "rule \"{package}{name}\" \n"
+                + "rule \"{engineName}{name}\" \n"
                 + "when \n"
-                + " $list1:List(judge{name}(this)) \n"
+                + " $list1:List(judge{engineName}{name}(this)) \n"
                 + "then \n"
                 + "end \n";
     }
@@ -331,7 +340,7 @@ public class DroolsEngine {
         String template = getDrlContentTemplate();
         template = template.replace("{targetStr}", targetStr);
         template = template.replace("{name}", name);
-        template = template.replace("{package}", engineName);
+        template = template.replace("{engineName}", engineName);
         return template;
     }
 
@@ -339,14 +348,23 @@ public class DroolsEngine {
      * 批量生成drl文件内容
      */
     private static Map<String,String> createDrlContents(int count,String engineName){
+        return createDrlContents(count,engineName,null);
+    }
+
+    private static Map<String,String> createDrlContents(int count,String engineName,String randomStr){
         Map<String,String> res = new HashMap<>();
+        if(randomStr==null||randomStr.trim().length()==0){
+            randomStr = "";
+        }
         for (int i=0;i<count;i++){
-            String content = getDrlContentInstance(String.valueOf(i),String.valueOf(i),engineName);
-            String drlPath = engineName+String.valueOf(i)+".drl";
+            String iStr = String.valueOf(i);
+            String content = getDrlContentInstance(iStr,iStr,engineName+randomStr);
+            String drlPath = engineName+randomStr+iStr+".drl";
             res.put(drlPath, content);
         }
         return res;
     }
+
 
     /**
      * 批量将drl文件内容添加至kfs中
@@ -370,9 +388,63 @@ public class DroolsEngine {
         }
     }
 
+    /** TODO
+     * 使用CountDownLatch实现的并行类
+     * CountDownLatch 基于 AQS 的共享模式的使用
+     */
+    static class ParallelCountDownLatch{
 
+        private void doCountDownLatch(){
+            int parallelismNum = 2;
+            CountDownLatch countDownLatch = new CountDownLatch(parallelismNum);
+            for(int i=0;i<parallelismNum;i++){
+                new Thread(()->{
+                    String engineName = RandomStringUtils.randomAlphanumeric(2);
+                    DroolsEngine droolsEngine =  new DroolsEngine(engineName);
+                    log.info("{}{}",engineName,"初始化drl文件内容");
+                    Map<String,String> drls = createDrlContents(5,engineName);
+                    log.info("{}{}",engineName,"将drl文件内容添加到drools引擎的kfs中");
+                    droolsEngine.add_drlContent_list(drls);
+                    log.info("{}{}",engineName,"将drools引擎kfs中的规则进行编译");
+                    droolsEngine.prepareEngine();
+                    countDownLatch.countDown();
+                }).start();
+            }
+            try{
+                countDownLatch.await();
+            }catch (Exception e){
+                log.error("Exception -> {}",e);
+            }
 
+        }
+    }
 
+    /** TODO
+     * 使用CyclicBarrier实现的并行类
+     * 基于 Condition 来实现的
+     */
+    static class ParallelCyclicBarrier{
+        private void doCyclicBarrier(){
+            int parallelismNum = 2;
+            CyclicBarrier cyclicBarrier = new CyclicBarrier(parallelismNum);
+            for(int i=0;i<parallelismNum;i++){
+                new Thread(()->{
+                    try{
+                        String engineName = RandomStringUtils.randomAlphanumeric(2);
+                        DroolsEngine droolsEngine =  new DroolsEngine(engineName);
+                        log.info("{}{}",engineName,"初始化drl文件内容");
+                        Map<String,String> drls = createDrlContents(5,engineName);
+                        log.info("{}{}",engineName,"将drl文件内容添加到drools引擎的kfs中");
+                        droolsEngine.add_drlContent_list(drls);
+                        log.info("{}{}",engineName,"将drools引擎kfs中的规则进行编译");
+                        droolsEngine.prepareEngine();
+                    }catch (Exception e){
+                        log.error("Exception -> {}",e);
+                    }
+                }).start();
+            }
+        }
+    }
 
 
 
