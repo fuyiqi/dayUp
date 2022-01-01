@@ -7,8 +7,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Simple {
     /**
      * 多生产者多消费者模式之使用单缓冲区
-     *  01.drl.缓冲区使用线性队列
-     *  02.drl.单个缓冲区在面对多生成多消费时，读写开销大
+     *  缓冲区使用线性队列
+     *  单个缓冲区在面对多生成多消费时，读写开销大
      */
 
     public static void main(String[] args){

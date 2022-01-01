@@ -1,6 +1,6 @@
 package EngineSkill.Drools.Matcher;
 
-import EngineSkill.Drools.DroolsHelper;
+import EngineSkill.Drools.demo.DroolsHelper;
 
 public class MyMatcher1 {
 

@@ -1,4 +1,4 @@
-package EngineSkill.Drools;
+package EngineSkill.Drools.demo;
 
 
 
@@ -10,7 +10,6 @@ import org.kie.api.builder.Message;
 import org.kie.api.builder.Results;
 import org.kie.api.definition.KiePackage;
 import org.kie.api.definition.rule.Rule;
-import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.internal.utils.KieHelper;
 
