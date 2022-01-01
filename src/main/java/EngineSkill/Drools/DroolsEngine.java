@@ -30,13 +30,14 @@ public class DroolsEngine {
     private KieBase kieBase;
 
     //测试所用变量
-    private String engineName = "default";
+    public String engineName = "default";
     //测试所用的析构方法
-    private DroolsEngine(String enginename){
+    public DroolsEngine(String enginename){
         engineName = enginename;
     }
     //是否要编译的标志【kfs有变动就要编译，获取完kieContainer就不用】
-    private boolean needBuildFlag;
+    public boolean needBuildFlag;
+    //全局锁
     private static Lock lock = new ReentrantLock();
     private static Condition condition = lock.newCondition();
 
@@ -88,6 +89,15 @@ public class DroolsEngine {
             lock.unlock();
         }
 
+    }
+
+    /**
+     * 单例时使用的编译
+     */
+    public void prepareEngineSinglton(){
+        kieContainer = (KieContainerImpl)getKieContainer();
+        kieBase = kieContainer.getKieBase();
+        valid_in_kfs_and_kiebase();
     }
 
     /**
@@ -240,11 +250,21 @@ public class DroolsEngine {
                     droolsEngine.prepareEngine();
                     droolsEngine.needBuildFlag = false;
                     log.info("{}待编译标志->{}：已编译，kfs资源状态为旧",droolsEngine.engineName,droolsEngine.needBuildFlag);
+                    log.info("{}{}",droolsEngine.engineName,"初始化事实");
+                    List<String> list = getFact1(3);
+                    log.info("{}{}",droolsEngine.engineName,"将事实与规则进行匹配");
+                    droolsEngine.runMatch(list);
+                    log.info("{}{}",droolsEngine.engineName,"根据drl文件名剔除drools引擎kfs中的规则");
+                    droolsEngine.remove__drlContent_list(drls);
+                    droolsEngine.needBuildFlag = true;
+                    log.info("{}{}",droolsEngine.engineName,"将drools引擎kfs中的规则进行编译");
+                    droolsEngine.prepareEngine();
+                    droolsEngine.needBuildFlag = false;
                 }).start();
             }
         }
 
-        private void doSingleton(){//单例的时候各种上锁会有问题
+        private void doSingleton(){
             int parallelismNum = 2;
             for(int i=0;i<parallelismNum;i++){
                 new Thread(()->{
@@ -254,12 +274,16 @@ public class DroolsEngine {
                     Map<String,String> drls = createDrlContents(5,droolsEngine.engineName,randomStr);
                     log.info("{}{}",droolsEngine.engineName,"将drl文件内容添加到drools引擎的kfs中");
                     droolsEngine.add_drlContent_list(drls);
-                    droolsEngine.needBuildFlag = true;
-                    log.info("{}待编译标志->{}：待编译，kfs资源状态为新",droolsEngine.engineName,droolsEngine.needBuildFlag);
                     log.info("{}{}",droolsEngine.engineName,"将drools引擎kfs中的规则进行编译");
-                    droolsEngine.prepareEngine();
-                    droolsEngine.needBuildFlag = false;
-                    log.info("{}待编译标志->{}：已编译，kfs资源状态为旧",droolsEngine.engineName,droolsEngine.needBuildFlag);
+                    droolsEngine.prepareEngineSinglton();
+                    log.info("{}{}",droolsEngine.engineName,"初始化事实");
+                    List<String> list = getFact1(3);
+                    log.info("{}{}",droolsEngine.engineName,"将事实与规则进行匹配");
+                    droolsEngine.runMatch(list);
+                    log.info("{}{}",droolsEngine.engineName,"根据drl文件名剔除drools引擎kfs中的规则");
+                    droolsEngine.remove__drlContent_list(drls);
+                    log.info("{}{}",droolsEngine.engineName,"将drools引擎kfs中的规则进行编译");
+                    droolsEngine.prepareEngineSinglton();
                 }).start();
             }
         }
@@ -270,25 +294,6 @@ public class DroolsEngine {
 
 
 
-    /**说明drools的使用方法*/
-    private static void A_Drools_Usage(){
-        log.info("{}","初始化drools引擎");
-        DroolsEngine droolsEngine = DroolsEngine.getInstance();
-        log.info("{}","初始化drl文件内容");
-        Map<String,String> drls = createDrlContents(5,"myTest");
-        log.info("{}","将drl文件内容添加到drools引擎的kfs中");
-        droolsEngine.add_drlContent_list(drls);
-        log.info("{}","将drools引擎kfs中的规则进行编译");
-        droolsEngine.prepareEngine();
-        log.info("{}","初始化事实");
-        List<String> list = getFact1(3);
-        log.info("{}","将事实与规则进行匹配");
-        droolsEngine.runMatch(list);
-        log.info("{}","根据drl文件名剔除drools引擎kfs中的规则");
-        droolsEngine.remove__drlContent_list(drls);
-        log.info("{}","将drools引擎kfs中的规则进行编译");
-        droolsEngine.prepareEngine();
-    }
 
     /**
      * 构建事实
@@ -387,68 +392,6 @@ public class DroolsEngine {
             deleteDrls(drlPath);
         }
     }
-
-    /** TODO
-     * 使用CountDownLatch实现的并行类
-     * CountDownLatch 基于 AQS 的共享模式的使用
-     */
-    static class ParallelCountDownLatch{
-
-        private void doCountDownLatch(){
-            int parallelismNum = 2;
-            CountDownLatch countDownLatch = new CountDownLatch(parallelismNum);
-            for(int i=0;i<parallelismNum;i++){
-                new Thread(()->{
-                    String engineName = RandomStringUtils.randomAlphanumeric(2);
-                    DroolsEngine droolsEngine =  new DroolsEngine(engineName);
-                    log.info("{}{}",engineName,"初始化drl文件内容");
-                    Map<String,String> drls = createDrlContents(5,engineName);
-                    log.info("{}{}",engineName,"将drl文件内容添加到drools引擎的kfs中");
-                    droolsEngine.add_drlContent_list(drls);
-                    log.info("{}{}",engineName,"将drools引擎kfs中的规则进行编译");
-                    droolsEngine.prepareEngine();
-                    countDownLatch.countDown();
-                }).start();
-            }
-            try{
-                countDownLatch.await();
-            }catch (Exception e){
-                log.error("Exception -> {}",e);
-            }
-
-        }
-    }
-
-    /** TODO
-     * 使用CyclicBarrier实现的并行类
-     * 基于 Condition 来实现的
-     */
-    static class ParallelCyclicBarrier{
-        private void doCyclicBarrier(){
-            int parallelismNum = 2;
-            CyclicBarrier cyclicBarrier = new CyclicBarrier(parallelismNum);
-            for(int i=0;i<parallelismNum;i++){
-                new Thread(()->{
-                    try{
-                        String engineName = RandomStringUtils.randomAlphanumeric(2);
-                        DroolsEngine droolsEngine =  new DroolsEngine(engineName);
-                        log.info("{}{}",engineName,"初始化drl文件内容");
-                        Map<String,String> drls = createDrlContents(5,engineName);
-                        log.info("{}{}",engineName,"将drl文件内容添加到drools引擎的kfs中");
-                        droolsEngine.add_drlContent_list(drls);
-                        log.info("{}{}",engineName,"将drools引擎kfs中的规则进行编译");
-                        droolsEngine.prepareEngine();
-                    }catch (Exception e){
-                        log.error("Exception -> {}",e);
-                    }
-                }).start();
-            }
-        }
-    }
-
-
-
-
 
 
 }
