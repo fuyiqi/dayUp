@@ -86,35 +86,40 @@ public class HensAndMen {
 
         private void add() throws InterruptedException {
             lock.lock();
-            if(basket.size()>=designCapacity){//篮子满了
-                log.info("篮子满了");
+            int eggNum = new Random().nextInt(100);
+            if(basket.size()+eggNum>=designCapacity){//
+                log.info("篮子里装不下要放的蛋,要放入{}个，当前已占用{}个",eggNum,basket.size());
                 menCondition.signalAll();
                 log.info("通知人拿蛋");
                 hensCondition.await();
                 log.info("通知鸡别生蛋");
             }else{
-                int eggNum = new Random().nextInt(10);
                 List<Egg> addEggs = createEggs(eggNum);
                 basket.addAll(addEggs);
-                log.info("{}放蛋,当前容量:{}",eggNum,basket.size());
+                log.info("[放蛋]:{},当前容量:{}",eggNum,basket.size());
             }
             lock.unlock();
         }
 
         private void remove() throws InterruptedException {
             lock.lock();
-            if(basket.size()<=0){//篮子空了
-                log.info("篮子空了");
+            int removeNum = 0;
+            if(basket.size()<=1){
+                removeNum = 1;
+            }else{
+                removeNum = new Random().nextInt(basket.size());
+            }
+            if(basket.size()-removeNum<=0){
+                log.info("篮子里蛋的数量不够拿,要拿走{}个，当前已占用{}个",removeNum,basket.size());
                 hensCondition.signalAll();
                 log.info("通知鸡生蛋");
                 menCondition.await();
                 log.info("通知人别拿蛋");
             }else{
-                int removeNum = new Random().nextInt(basket.size());
                 for(int i=0;i<removeNum;i++) {
                     basket.remove(0);
                 }
-                log.info("-{}拿蛋,当前容量:{}",removeNum,basket.size());
+                log.info("[拿蛋]:-{},当前容量:{}",removeNum,basket.size());
             }
             lock.unlock();
         }
