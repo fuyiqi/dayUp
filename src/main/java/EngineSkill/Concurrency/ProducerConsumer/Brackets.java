@@ -1,4 +1,4 @@
-package EngineSkill.ProducerConsumer.Instance;
+package EngineSkill.Concurrency.ProducerConsumer;
 
 
 import org.slf4j.Logger;

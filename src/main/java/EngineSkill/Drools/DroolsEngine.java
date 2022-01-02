@@ -40,7 +40,8 @@ public class DroolsEngine {
     private static final Lock lock = new ReentrantLock();
     private static final Condition condition = lock.newCondition();
 
-    /**嵌套模式的单例
+    /**
+     * 嵌套模式的单例
      * 线程安全
      * **/
     private DroolsEngine(){}
@@ -67,6 +68,7 @@ public class DroolsEngine {
         ReleaseId releaseId = kieRepository.getDefaultReleaseId();
         return ks.newKieContainer(releaseId);
     }
+
 
     /**
      * 编译
@@ -108,7 +110,7 @@ public class DroolsEngine {
         boolean isSameFlag = drls_kfs.toString().equals(drls_kiebase.toString());
         log.info("Valid[RESULT={}]",isSameFlag);
         if(!isSameFlag){
-            log.error("NOT SAME,kfs={}, kiebase={}",drls_kfs,drls_kiebase);
+            log.error("======================================================================>NOT SAME,kfs={}, kiebase={}",drls_kfs,drls_kiebase);
             return;
         }
         log.info("=*=*=*=*=*=*=*=*=*=*=*Valid[end]=*=*=*=*=*=*=*=*=*=*=*");
@@ -200,7 +202,7 @@ public class DroolsEngine {
         try {
             matchNum = ks.fireAllRules(
                     match -> {
-                        log.info("============MatchRuleName:" + match.getRule().getName() + "============");
+                        log.info("MatchRuleName:{}" ,match.getRule().getName() );
                         return true;
                     }
             );
@@ -238,7 +240,7 @@ public class DroolsEngine {
          * 并发
          */
         private void doParallel(){
-            int parallelismNum = 16;
+            int parallelismNum = 2;
             for(int i=0;i<parallelismNum;i++){
                 new Thread(()->{
                     String engineName = RandomStringUtils.randomAlphanumeric(2);
@@ -246,10 +248,10 @@ public class DroolsEngine {
                     Map<String,String> drls = createDrls(droolsEngine,3);
                     addDrlsToKFS(droolsEngine,drls);
                     buildEngine(droolsEngine);
-                    List<String> list = createFact(droolsEngine,2);
+/*                    List<String> list = createFact(droolsEngine,2);
                     match(droolsEngine,list);
                     removeDrlsFromKFS(droolsEngine,drls);
-                    buildEngine(droolsEngine);
+                    buildEngine(droolsEngine);*/
                 }).start();
             }
         }
