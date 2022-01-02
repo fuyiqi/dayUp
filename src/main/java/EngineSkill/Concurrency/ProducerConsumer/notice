@@ -1,4 +1,0 @@
-A模式
-    使用synchronized、wait和notify
-B模式
-    使用lock和condition的await、signalAll
