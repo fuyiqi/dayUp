@@ -10,36 +10,72 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class MyParallel {
-    private static final Logger log= LoggerFactory.getLogger(MyParallel.class);
+public class AccountTransfer {
+    private static final Logger log= LoggerFactory.getLogger(AccountTransfer.class);
 
     public static void main(String[] args) {
-        new MyParallel().do_transfer();
+        new AccountTransfer().do_transfer();
     }
 
 //蚂蚁面试
 
-    /**模拟市场上人们转账**/
-    public  void do_transfer(){
-        List<Account> accounts = createAccounts(5);
-        List<Account> doDealAccounts = getDealAccounts(accounts);
-        Account out = doDealAccounts.get(0);
-        Account come = doDealAccounts.get(1);
-        int dealNum = 10;
-        int randomPostive = 10;
-        int randomNegative = 20;
-        log.info("交易前，{}拥有{},{}拥有{}======合计:{}",out.name,out.remains,come.name,come.remains,out.remains+come.remains);
-        for(int i=0;i<dealNum;i++){
-            int amount = new Random().nextInt(randomPostive)-new Random().nextInt(randomNegative);
-            int dealAmount = Math.abs(amount);
-            if(amount>=0){
-                log.info("{}:入帐金额={}",out.name,dealAmount);
-            }else {
-                log.info("{}:出帐金额={}",come.name,dealAmount);
-            }
-            new DoDeals(out,come,dealAmount).start();
+    /**
+     * 模拟多人多轮转账
+     */
+    public void do_transfer(){
+        int randomAccountNum = new Random().nextInt(98);
+        List<Account> accounts = createAccounts(randomAccountNum);
+        for(int i=0;i<randomAccountNum;i++){
+            //log.info(">>>>>>>>>>>>>>>>第{}轮两人交易前市场上总资产={}<<<<<<<<<<<<<<<<<<<<",i,getTotalAsset(accounts));
+            do_transfer_onTwo(accounts,10,400,900,i);
+            //log.info(">>>>>>>>>>>>>>>>第{}轮两人交易后市场上总资产={}<<<<<<<<<<<<<<<<<<<<",i,getTotalAsset(accounts));
         }
-        log.info("交易后，{}拥有{},{}拥有{}======合计:{}",out.name,out.remains,come.name,come.remains,out.remains+come.remains);
+
+
+    }
+
+    private long getTotalAsset(List<Account> accounts){
+        long sum = 0;
+        for(Account account:accounts){
+            sum+=account.remains;
+        }
+        return sum;
+    }
+
+    /**
+     * 模拟两人多轮转账
+     * @param accounts
+     * @param dealRounds
+     * @param randomDealNegative
+     * @param randomDealPostive
+     * **/
+    private void do_transfer_onTwo(List<Account> accounts,int dealRounds,int randomDealPostive,int randomDealNegative,int round){
+        List<Account> doDealAccounts = getDealAccounts(accounts);
+        Account first = doDealAccounts.get(0);
+        Account second = doDealAccounts.get(1);
+        long before = first.remains+second.remains;
+
+        for(int i=0;i<dealRounds;i++){
+            //log.info("<========第{}-{}轮两人交易前，{}拥有{},{}拥有{}======合计:{}========>",round,i,first.name,first.remains,second.name,second.remains,before);
+            int amount = new Random().nextInt(randomDealPostive)-new Random().nextInt(randomDealNegative);
+            if(amount>=0){
+                new DoDeals(first,second,amount).start();
+                log.info("{}:入帐金额={}",first.name,amount);
+            }else {
+                amount = -amount;
+                new DoDeals(second,first,amount).start();
+                log.info("{}:出帐金额={}",second.name,amount);
+            }
+            long after = first.remains+second.remains;
+            //log.info("<========第{}-{}轮两人交易后，{}拥有{},{}拥有{}======合计:{}========>",round,i,first.name,first.remains,second.name,second.remains,after);
+/*            if(before==after){
+                log.info("第{}轮账平,{},{}",i,first.name,second.name);
+            }else {
+                log.error("第{}轮帐不平,{},{}",i,first.name,second.name);
+            }*/
+        }
+
+
     }
 
     private List<Account> createAccounts(int accountNum){
@@ -56,7 +92,7 @@ public class MyParallel {
     private List<Account> getDealAccounts(List<Account> accounts){
         List<Account>list = new ArrayList<>(2);
         if(accounts.size()<2){
-           log.error("无法进行交易");
+           log.error("市场上人少于2人，无法进行交易");
         }else {
             HashSet<Integer> set = new HashSet<Integer>();
             while(set.size()<2){
@@ -133,7 +169,6 @@ public class MyParallel {
         public Account (String name,int asset){
             this.name = name;
             this.remains = asset;
-            log.info("{}现有金额{}",this.name,this.remains);
         }
 
     }
