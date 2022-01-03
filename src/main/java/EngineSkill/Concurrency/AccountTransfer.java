@@ -23,19 +23,21 @@ public class AccountTransfer {
 
     private void do_Contransfer_onAll(){
         List<Account> accounts = createAccounts(9);
-
+        checkAllAssets(accounts);
         for(int i=0;i<5;i++){
             new DoTransfer(accounts,3,10,10,i).start();
         }
-
+        checkAllAssets(accounts);
     }
 
     private static void checkAllAssets(List<Account> accounts){
+        long sum = 0;
         log.info("=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
         for(Account account:accounts){
             log.info("{} 拥有资产:{}",account.name,account.remains);
+            sum+=account.remains;
         }
-        log.info("=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
+        log.info("=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*\n total Asset={}",sum);
     }
 
     /**
@@ -61,59 +63,19 @@ public class AccountTransfer {
         }
 
         public void run(){
-
             for(int i=0;i<dealRounds;i++){
-                long before = first.remains+second.remains;
-                log.info("<=第{}-{}轮两人交易前，{}拥有{},{}拥有{}======合计:{}=>",roundIdx,i,first.name,first.remains,second.name,second.remains,before);
+                Thread comeThread = null;
+                Thread outThread = null;
                 if(amount>=0){
-                    new DoDeals(first,second,amount).start();
+                    comeThread = new DoDeals(first,second,amount);
+                    comeThread.start();
                     //log.info("{}:入帐金额={}",first.name,amount);
                 }else {
                     amount = -amount;
-                    new DoDeals(second,first,amount).start();
+                    outThread = new DoDeals(second,first,amount);
+                    outThread.start();
                     //log.info("{}:出帐金额={}",second.name,amount);
                 }
-                long after = first.remains+second.remains;
-                log.info("<=第{}-{}轮两人交易后，{}拥有{},{}拥有{}======合计:{}=>",roundIdx,i,first.name,first.remains,second.name,second.remains,after);
-                if(before==after){
-                    log.info("{},{}经历{}-{}轮交易后，帐平",first.name,second.name,roundIdx,i);
-                }else {
-                    log.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>{},{}经历{}-{}轮交易后，帐不平,",first.name,second.name,roundIdx,i);
-                }
-            }
-
-
-        }
-
-    }
-
-
-
-    /**
-     * 模拟两户并发多轮转账
-     * **/
-    private void do_Contransfer_onTwo(List<Account> accounts,int dealRounds,int dealPostive,int dealNegative,int roundIdx){
-        List<Account> doDealAccounts = getDealAccounts(accounts);
-        Account first = doDealAccounts.get(0);
-        Account second = doDealAccounts.get(1);
-        for(int i=0;i<dealRounds;i++){
-            long before = first.remains+second.remains;
-            log.info("<========第{}-{}轮两人交易前，{}拥有{},{}拥有{}======合计:{}========>",roundIdx,i,first.name,first.remains,second.name,second.remains,before);
-            int amount = new Random().nextInt(dealPostive)-new Random().nextInt(dealNegative);
-            if(amount>=0){
-                new DoDeals(first,second,amount).start();
-                log.info("{}:入帐金额={}",first.name,amount);
-            }else {
-                amount = -amount;
-                new DoDeals(second,first,amount).start();
-                log.info("{}:出帐金额={}",second.name,amount);
-            }
-            long after = first.remains+second.remains;
-            log.info("<========第{}-{}轮两人交易后，{}拥有{},{}拥有{}======合计:{}========>",roundIdx,i,first.name,first.remains,second.name,second.remains,after);
-            if(before==after){
-                log.info("{},{}经历{}-{}轮交易后，帐平",first.name,second.name,roundIdx,i);
-            }else {
-                log.error(">>>>>>>>{},{}经历{}-{}轮交易后，帐不平,",first.name,second.name,roundIdx,i);
             }
         }
 
@@ -154,6 +116,7 @@ public class AccountTransfer {
         private Account out;
         private Account come;
         private int dealAmount;
+        private static final Lock lock = new ReentrantLock();
         public DoDeals(Account out,Account come, int dealAmount){
             this.out = out;
             this.come = come;
@@ -163,10 +126,18 @@ public class AccountTransfer {
         @Override
         public void run() {
             super.run();
-            log.info("[start]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
-            out.toOut(dealAmount);
-            come.toCome(dealAmount);
-            log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
+            try{
+                log.info("[start]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
+                lock.lock();
+                out.toOut(dealAmount);
+                come.toCome(dealAmount);
+                log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
+            }catch (Exception e){
+                log.error("[DoDeals]Exceptionm ->",e);
+            }finally {
+               lock.unlock();
+            }
+
         }
     }
 
@@ -183,7 +154,6 @@ public class AccountTransfer {
         private static final Lock lock = new ReentrantLock();
         //出账条件
         private static final Condition outCondition = lock.newCondition();
-
         //出账
         private void toOut(int outAmount){
            try{
@@ -193,7 +163,6 @@ public class AccountTransfer {
                 }else{//帐已空
                     log.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!{}:余额为空",this.name);
                     outCondition.await();
-
                 }
             }catch (Exception e){
                 log.error("{}:出账Exception->",this.name,e);
@@ -210,9 +179,11 @@ public class AccountTransfer {
         public Account (String name,int asset){
             this.name = name;
             this.remains = asset;
+            //log.info("{}拥有{}",name,remains);
         }
 
     }
+
 
 
 
