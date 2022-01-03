@@ -6,11 +6,12 @@ import org.slf4j.LoggerFactory;
 
 
 import java.util.*;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicLong;
+
 
 public class AccountTransfer {
+    private static final AtomicLong totalInit = new AtomicLong();
+
     private static final Logger log= LoggerFactory.getLogger(AccountTransfer.class);
 
     public static void main(String[] args) {
@@ -23,68 +24,53 @@ public class AccountTransfer {
 
     private void do_Contransfer_onAll(){
         List<Account> accounts = createAccounts(9);
-        checkAllAssets(accounts);
+        log.info("初始总账：{}",totalInit.get());
         for(int i=0;i<5;i++){
-            new DoTransfer(accounts,3,10,10,i).start();
+            new DoTransfer(accounts,3,10,10).start();
         }
-        checkAllAssets(accounts);
-    }
+        long sum = accounts.stream().map(account -> account.remains.get()).mapToLong(t -> t).sum();
+        log.info("交易后总账：{}",sum);
+        if(totalInit.get() == sum){
+            log.info("总账平");
+        }
 
-    private static void checkAllAssets(List<Account> accounts){
-        long sum = 0;
-        log.info("=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
-        for(Account account:accounts){
-            log.info("{} 拥有资产:{}",account.name,account.remains);
-            sum+=account.remains;
-        }
-        log.info("=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*\n total Asset={}",sum);
+
     }
 
     /**
      * 多人交易类
      */
     static class DoTransfer extends Thread{
-        private Account first;
-        private Account second;
+        private final Account first;
+        private final Account second;
+        //选取两人交易的次数
         private final int dealRounds;
-        private final int dealPostive;
-        private final int dealNegative;
-        private int amount;
-        private final int roundIdx;
-        public DoTransfer(List<Account> accounts,int dealRounds,int dealPostive,int dealNegative,int roundIdx){
+        //交易数额
+        private final int dealAmount;
+        public DoTransfer(List<Account> accounts,int dealRounds,int dealPositive,int dealNegative){
             List<Account> doDealAccounts = getDealAccounts(accounts);
             first=doDealAccounts.get(0);
             second=doDealAccounts.get(1);
             this.dealRounds=dealRounds;
-            this.dealPostive=dealPostive;
-            this.dealNegative=dealNegative;
-            this.amount = new Random().nextInt(dealPostive)-new Random().nextInt(dealNegative);
-            this.roundIdx = roundIdx;
+            this.dealAmount = new Random().nextInt(dealPositive)-new Random().nextInt(dealNegative);
         }
 
         public void run(){
             for(int i=0;i<dealRounds;i++){
-                Thread comeThread = null;
-                Thread outThread = null;
-                if(amount>=0){
-                    comeThread = new DoDeals(first,second,amount);
-                    comeThread.start();
-                    //log.info("{}:入帐金额={}",first.name,amount);
-                }else {
-                    amount = -amount;
-                    outThread = new DoDeals(second,first,amount);
-                    outThread.start();
-                    //log.info("{}:出帐金额={}",second.name,amount);
-                }
+                new DoDeals(first,second,dealAmount).start();
             }
+
         }
 
     }
+
+
 
     private static List<Account> createAccounts(int accountNum){
         List<Account> accounts = new ArrayList<>();
         for(int i=0;i<accountNum;i++){
             int asset = new Random().nextInt(300);//Integer.MAX_VALUE);
+            totalInit.addAndGet(asset);
             String name = RandomStringUtils.randomAlphabetic(4);
             accounts.add(new Account(name,asset));
         }
@@ -95,9 +81,9 @@ public class AccountTransfer {
     private static List<Account> getDealAccounts(List<Account> accounts){
         List<Account>list = new ArrayList<>(2);
         if(accounts.size()<2){
-           log.error("市场上人少于2人，无法进行交易");
+            log.error("市场上人少于2人，无法进行交易");
         }else {
-            HashSet<Integer> set = new HashSet<Integer>();
+            HashSet<Integer> set = new HashSet<>();
             while(set.size()<2){
                 int random = (int) (Math.random() * accounts.size());
                 if (!set.contains(random)){
@@ -113,10 +99,10 @@ public class AccountTransfer {
      * 两户交易类
      */
     static class DoDeals extends Thread{
-        private Account out;
-        private Account come;
-        private int dealAmount;
-        private static final Lock lock = new ReentrantLock();
+        private final Account out;
+        private final Account come;
+        //交易金额
+        private final int dealAmount;
         public DoDeals(Account out,Account come, int dealAmount){
             this.out = out;
             this.come = come;
@@ -126,19 +112,20 @@ public class AccountTransfer {
         @Override
         public void run() {
             super.run();
-            try{
+            if(dealAmount>0){
                 log.info("[start]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
-                lock.lock();
-                out.toOut(dealAmount);
-                come.toCome(dealAmount);
-                log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
-            }catch (Exception e){
-                log.error("[DoDeals]Exceptionm ->",e);
-            }finally {
-               lock.unlock();
+            }else {
+                log.info("[start]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
             }
-
+            out.toOut(dealAmount);
+            come.toCome(dealAmount);
+            if(dealAmount>0){
+                log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
+            }else {
+                log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
+            }
         }
+
     }
 
 
@@ -149,44 +136,23 @@ public class AccountTransfer {
         //账户名
         private final String name;
         //账户余额
-        private volatile long remains ;
-        //动帐锁
-        private static final Lock lock = new ReentrantLock();
-        //出账条件
-        private static final Condition outCondition = lock.newCondition();
+        private final AtomicLong remains;
+
         //出账
         private void toOut(int outAmount){
-           try{
-                lock.lock();
-                if(remains-outAmount>0){//允许出账的条件
-                    remains = remains-outAmount;
-                }else{//帐已空
-                    log.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!{}:余额为空",this.name);
-                    outCondition.await();
-                }
-            }catch (Exception e){
-                log.error("{}:出账Exception->",this.name,e);
-            }finally {
-                lock.unlock();
-            }
+            remains.addAndGet(-outAmount);
         }
 
         //入账
-        private void toCome(int comeAmount){
-            remains = remains+comeAmount;
+        private void  toCome(int comeAmount){
+            remains.addAndGet(comeAmount);
         }
 
         public Account (String name,int asset){
             this.name = name;
-            this.remains = asset;
-            //log.info("{}拥有{}",name,remains);
+            this.remains = new AtomicLong(asset);
         }
 
     }
-
-
-
-
-
 
 }
