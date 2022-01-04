@@ -20,8 +20,13 @@ public class HensAndMen {
         Condition hensCondition = lock.newCondition();
         Condition menCondition = lock.newCondition();
         Basket basket = new Basket(lock,hensCondition,menCondition);
-        new Men(basket).start();
-        new Hens(basket).start();
+        for(int i=0;i<5;i++){//5个人拿蛋
+            new Men(basket).start();
+        }
+        for(int i=0;i<5;i++){//5个鸡生蛋
+            new Hens(basket).start();
+        }
+
     }
 
     static class Men extends Thread{

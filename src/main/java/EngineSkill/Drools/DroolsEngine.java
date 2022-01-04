@@ -81,7 +81,7 @@ public class DroolsEngine {
                 kieBase = kieContainer.getKieBase();
                 valid_in_kfs_and_kiebase();
             }else{
-                condition.await();
+                //condition.await();
             }
         }catch (Exception e){
             log.error("Compile Exception->",e);
@@ -119,7 +119,7 @@ public class DroolsEngine {
         boolean isSameFlag = drls_kfs.toString().equals(drls_kiebase.toString());
         if(isSameFlag){
             res.put("ValidResult",true);
-            log.info("ValidResult{}",isSameFlag);
+            log.info("ValidResult={}",isSameFlag);
         }else{
             res.put("ValidResult",false);
             log.error("They are NOT SAME,kfs={}, kiebase={}",drls_kfs,drls_kiebase);
@@ -248,7 +248,7 @@ public class DroolsEngine {
          * 并发
          */
         private void doParallel(){
-            int parallelismNum = 2;
+            int parallelismNum = 100000;
             for(int i=0;i<parallelismNum;i++){
                 new Thread(()->{
                     String engineName = RandomStringUtils.randomAlphanumeric(2);
