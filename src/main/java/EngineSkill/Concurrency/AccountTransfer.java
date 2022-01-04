@@ -14,28 +14,35 @@ public class AccountTransfer {
 
     private static final Logger log= LoggerFactory.getLogger(AccountTransfer.class);
 
-    public static void main(String[] args) {
-        new AccountTransfer().do_Contransfer_onAll();
+    public static void main(String[] args) throws InterruptedException {
+        new AccountTransfer().do_mytransfer_on_all();
     }
 
 
 
 //蚂蚁面试
 
-    private void do_Contransfer_onAll(){
-        List<Account> accounts = createAccounts(9);
-        log.info("初始总账：{}",totalInit.get());
-        for(int i=0;i<5;i++){
-            new DoTransfer(accounts,3,10,10).start();
-        }
-        long sum = accounts.stream().map(account -> account.remains.get()).mapToLong(t -> t).sum();
-        log.info("交易后总账：{}",sum);
-        if(totalInit.get() == sum){
-            log.info("总账平");
-        }
 
-
+    private void do_mytransfer_on_all() throws InterruptedException {
+        List<Account> accounts = createAccounts(100);
+        checkAccountDetail(accounts);
+        for(int i=0;i<100000;i++){
+            new DoTransfer(accounts,3,100,100).start();
+        }
+        checkAccountDetail(accounts);
     }
+
+    private void checkAccountDetail(List<Account> accounts){
+        String str = "";
+        long sum = 0;
+        for(Account a:accounts){
+            String tmp = "%s拥有%s\n";
+            str+=String.format(tmp,a.name,a.remains.get());
+            sum+=a.remains.get();
+        }
+        log.info("{}市场上资产总额:{}",str,sum);
+    }
+
 
     /**
      * 多人交易类
@@ -59,9 +66,7 @@ public class AccountTransfer {
             for(int i=0;i<dealRounds;i++){
                 new DoDeals(first,second,dealAmount).start();
             }
-
         }
-
     }
 
 
@@ -69,7 +74,7 @@ public class AccountTransfer {
     private static List<Account> createAccounts(int accountNum){
         List<Account> accounts = new ArrayList<>();
         for(int i=0;i<accountNum;i++){
-            int asset = new Random().nextInt(300);//Integer.MAX_VALUE);
+            int asset = 100;//new Random().nextInt(100);
             totalInit.addAndGet(asset);
             String name = RandomStringUtils.randomAlphabetic(4);
             accounts.add(new Account(name,asset));
@@ -112,17 +117,32 @@ public class AccountTransfer {
         @Override
         public void run() {
             super.run();
+            //保障出账不能成为负资产
+            boolean isOutValid = true;
             if(dealAmount>0){
-                log.info("[start]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
+                log.info("[start]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
+                isOutValid = out.remains.get()- (long) dealAmount >=0;
+                if(isOutValid){//出账后不是负资产
+                    out.toOut(dealAmount);
+                    come.toCome(dealAmount);
+                    log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
+                }else{//出账后是负资产
+                    out.toOut(dealAmount);
+                    come.toCome(dealAmount);
+                    log.info("[end]===不足===无法处理{}向{}转账，当前{}余额{},转账金额{}",out.name,come.name,out.name,out.remains,dealAmount);
+                }
             }else {
-                log.info("[start]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
-            }
-            out.toOut(dealAmount);
-            come.toCome(dealAmount);
-            if(dealAmount>0){
-                log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
-            }else {
-                log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{}，{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
+                log.info("[start]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
+                isOutValid = come.remains.get()+ (long) dealAmount >=0;
+                if(isOutValid) {//出账后不是负资产
+                    out.toOut(dealAmount);
+                    come.toCome(dealAmount);
+                    log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
+                }else {
+                    out.toOut(dealAmount);
+                    come.toCome(dealAmount);
+                    log.info("[end]===不足===无法处理{}向{}转账，当前{}余额{},转账金额{}",come.name,out.name,come.name,come.remains,-dealAmount);
+                }
             }
         }
 

@@ -107,16 +107,25 @@ public class DroolsEngine {
         log.info("=*=*=*=*=*=*=*=*=*=*=*Valid[start]=*=*=*=*=*=*=*=*=*=*=*");
         List<String> drls_kfs = getRules_fromKFS();
         List<String> drls_kiebase = getRules_fromkieBase();
-        boolean isSameFlag = drls_kfs.toString().equals(drls_kiebase.toString());
-        log.info("Valid[RESULT={}]",isSameFlag);
-        if(!isSameFlag){
-            log.error("======================================================================>NOT SAME,kfs={}, kiebase={}",drls_kfs,drls_kiebase);
-            return;
-        }
+        areTheySame(drls_kfs,drls_kiebase);
         log.info("=*=*=*=*=*=*=*=*=*=*=*Valid[end]=*=*=*=*=*=*=*=*=*=*=*");
     }
 
-
+    /**
+     * 以kiebase为准,校验内容是否一致
+     */
+    private Map<String,Object> areTheySame(List<String> drls_kfs,List<String> drls_kiebase){
+        Map<String,Object> res = new HashMap<>();
+        boolean isSameFlag = drls_kfs.toString().equals(drls_kiebase.toString());
+        if(isSameFlag){
+            res.put("ValidResult",true);
+            log.info("ValidResult{}",isSameFlag);
+        }else{
+            res.put("ValidResult",false);
+            log.error("They are NOT SAME,kfs={}, kiebase={}",drls_kfs,drls_kiebase);
+        }
+        return res;
+    }
 
     /**
      * 添加单条规则 路径src/main/resources/drlname
