@@ -25,7 +25,7 @@ public class HensAndMen {
     }
 
     static class Men extends Thread{
-        private Basket basket;
+        private final Basket basket;
         public Men(Basket basket){
             this.basket = basket;
         }
@@ -43,7 +43,7 @@ public class HensAndMen {
     }
 
     static class Hens extends Thread{
-        private Basket basket;
+        private final Basket basket;
         public Hens(Basket basket){
             this.basket = basket;
         }
@@ -52,7 +52,6 @@ public class HensAndMen {
             while(true){
                 try {
                     Thread.sleep((long) (1000*Math.random()));
-
                     basket.add();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -63,11 +62,11 @@ public class HensAndMen {
 
 
     static class Basket{
-        private int designCapacity = 100;
-        private List<Egg> basket = Collections.synchronizedList(new ArrayList<>());
-        private Lock lock ;
-        private Condition hensCondition ;
-        private Condition menCondition ;
+        private final int designCapacity = 100;
+        private final List<Egg> basket = Collections.synchronizedList(new ArrayList<>(designCapacity));
+        private final Lock lock ;
+        private final Condition hensCondition ;
+        private final Condition menCondition ;
 
         public Basket(Lock lock,Condition hensCondition,Condition menCondition){
             this.lock = lock;
@@ -88,15 +87,15 @@ public class HensAndMen {
             lock.lock();
             int eggNum = new Random().nextInt(100);
             if(basket.size()+eggNum>=designCapacity){//
-                log.info("篮子里装不下要放的蛋,要放入{}个，当前已占用{}个",eggNum,basket.size());
+                log.info("篮子里装不下要放的蛋,要放入{}个，当前可用位置数{}",eggNum,designCapacity-basket.size());
                 menCondition.signalAll();
                 log.info("通知人拿蛋");
                 hensCondition.await();
                 log.info("通知鸡别生蛋");
             }else{
+                log.info("[放蛋]:{},当前可用位置数:{}",eggNum,designCapacity-basket.size());
                 List<Egg> addEggs = createEggs(eggNum);
                 basket.addAll(addEggs);
-                log.info("[放蛋]:{},当前容量:{}",eggNum,basket.size());
             }
             lock.unlock();
         }
@@ -109,8 +108,8 @@ public class HensAndMen {
             }else{
                 removeNum = new Random().nextInt(basket.size());
             }
-            if(basket.size()-removeNum<=0){
-                log.info("篮子里蛋的数量不够拿,要拿走{}个，当前已占用{}个",removeNum,basket.size());
+            if(basket.size()-removeNum<0){
+                log.info("篮子里蛋的数量不够拿,要拿走{}个，当前可用蛋数量{}",removeNum,basket.size());
                 hensCondition.signalAll();
                 log.info("通知鸡生蛋");
                 menCondition.await();
@@ -119,14 +118,14 @@ public class HensAndMen {
                 for(int i=0;i<removeNum;i++) {
                     basket.remove(0);
                 }
-                log.info("[拿蛋]:-{},当前容量:{}",removeNum,basket.size());
+                log.info("[拿蛋]:-{},当前蛋数:{}",removeNum,basket.size());
             }
             lock.unlock();
         }
     }
 
     static class Egg{
-        private String name;
+        private final String name;
         public Egg(String name){
             this.name=name;
         }
