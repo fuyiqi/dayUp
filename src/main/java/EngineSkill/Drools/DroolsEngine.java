@@ -47,7 +47,7 @@ public class DroolsEngine {
     private DroolsEngine(){}
 
     private static class Holder{
-        private static DroolsEngine _instance = new DroolsEngine();
+        private static final DroolsEngine _instance = new DroolsEngine();
     }
 
     public static DroolsEngine getInstance(){
@@ -134,7 +134,6 @@ public class DroolsEngine {
 
     /**
      * 删除规则
-     * @param drlname
      */
     public void deleteDrls(String drlname){
         String kieFilePath = "src/main/resources/" + drlname;
