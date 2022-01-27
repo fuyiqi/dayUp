@@ -16,11 +16,11 @@
         <testng.version>6.8.7</testng.version>
         <kafka-clients.version>0.10.2.1</kafka-clients.version>
         <log4j.version>1.7.21</log4j.version>
-        <fastjson.version>1.2.53</fastjson.version>
+        <fastjson.version>1.2.66</fastjson.version>
         <commons-lang.version>2.6</commons-lang.version>
         <freemaker.version>2.3.23</freemaker.version>
         <spring-tx.version>3.1.0.RELEASE</spring-tx.version>
-        <flink.version>1.8.1</flink.version>
+        <flink.version>1.13.3</flink.version>
 
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.0.0</maven-source-plugin.version>
@@ -69,7 +69,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.66</version>
+            <version>${fastjson.version}</version>
         </dependency>
 
         <dependency>
@@ -88,8 +88,16 @@
             <version>${log4j.version}</version>
         </dependency>
 
-
-
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-java</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java_2.12</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
 
 
 
