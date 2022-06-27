@@ -26,7 +26,6 @@ public class DroolsEngine {
     private final KieFileSystemImpl kfs = (KieFileSystemImpl)ks.newKieFileSystem();
     private KieContainerImpl kieContainer;
     private KieBase kieBase;
-
     //测试所用变量
     public String engineName = "default";
     //测试所用的析构方法
