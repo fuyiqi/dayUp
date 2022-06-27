@@ -25,6 +25,7 @@ public class Main {
     }
 
     public static void main(String[] args){
-
+        Object o = "0";
+        System.out.println(Long.valueOf(o.toString()));
     }
 }

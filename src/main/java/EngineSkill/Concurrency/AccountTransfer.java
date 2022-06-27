@@ -29,7 +29,7 @@ public class AccountTransfer {
     private void do_mytransfer_on_all() throws InterruptedException {
         List<Account> accounts = createAccounts(1000);
         checkAccountDetail(accounts);
-        for(int i=0;i<1000;i++){
+        for(int i=0;i<10000;i++){
             new DoTransfer(accounts,3,100,100).start();
         }
         Thread.sleep(200);
@@ -40,11 +40,11 @@ public class AccountTransfer {
         String str = "";
         long sum = 0;
         for(Account a:accounts){
-            String tmp = "%s拥有%s\n";
+            String tmp = "%s拥有%3d |";
             str+=String.format(tmp,a.name,a.remains.get());
             sum+=a.remains.get();
         }
-        log.info("{}市场上资产总额:{}",str,sum);
+        log.info("市场上资产总额:{}->{}",sum,str);
     }
 
 
@@ -78,7 +78,7 @@ public class AccountTransfer {
     private static List<Account> createAccounts(int accountNum){
         List<Account> accounts = new ArrayList<>();
         for(int i=0;i<accountNum;i++){
-            int asset = 100;//new Random().nextInt(100);
+            int asset = new Random().nextInt(100);
             String name = RandomStringUtils.randomAlphabetic(4);
             accounts.add(new Account(name,asset));
         }
@@ -127,38 +127,40 @@ public class AccountTransfer {
                 e.printStackTrace();
             }
             if(getLockFlag){
-                //log.info("获锁成功");
+                log.debug("获锁成功");
                 try{
                     //保障出账不能成为负资产
                     boolean isOutValid = true;
                     if(dealAmount>0){
-/*                        log.info("[start]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
+                        log.debug("[start]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
                         isOutValid = out.remains.get()- (long) dealAmount >=0;
                         if(isOutValid){//出账后不是负资产
                             out.toOut(dealAmount);
                             come.toCome(dealAmount);
-                            log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
+                            log.debug("[end]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
                         }else{//出账后是负资产
-                            log.info("[end]===不足===无法处理{}向{}转账，当前{}余额{},转账金额{}",out.name,come.name,out.name,out.remains,dealAmount);
-                        }*/
-                        log.info("[start]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
+                            log.debug("[end]===不足===无法处理{}向{}转账，当前{}余额{},转账金额{}",out.name,come.name,out.name,out.remains,dealAmount);
+                        }
+
+/*                        log.debug("[start]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
                         out.toOut(dealAmount);
                         come.toCome(dealAmount);
-                        log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);
+                        log.debug("[end]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",out.name,come.name,dealAmount,out.name,out.remains,come.name,come.remains);*/
                     }else {
-/*                        log.info("[start]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
+                        log.debug("[start]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
                         isOutValid = come.remains.get()+ (long) dealAmount >=0;
                         if(isOutValid) {//出账后不是负资产
                             out.toOut(dealAmount);
                             come.toCome(dealAmount);
-                            log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
+                            log.debug("[end]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
                         }else {
-                            log.info("[end]===不足===无法处理{}向{}转账，当前{}余额{},转账金额{}",come.name,out.name,come.name,come.remains,-dealAmount);
-                        }*/
-                        log.info("[start]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
+                            log.debug("[end]===不足===无法处理{}向{}转账，当前{}余额{},转账金额{}",come.name,out.name,come.name,come.remains,-dealAmount);
+                        }
+
+/*                        log.debug("[start]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
                         out.toOut(dealAmount);
                         come.toCome(dealAmount);
-                        log.info("[end]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);
+                        log.debug("[end]处理{}向{}转账，交易金额为{},当前{}余额{},{}余额{}",come.name,out.name,-dealAmount,come.name,come.remains,out.name,out.remains);*/
                     }
                 }catch (Exception e){
                     log.error("[DoDeals.run()]Exception->",e);

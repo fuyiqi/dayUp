@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -38,7 +37,6 @@ public class DroolsEngine {
     public boolean needBuildFlag;
     //全局锁
     private static final Lock lock = new ReentrantLock();
-    private static final Condition condition = lock.newCondition();
 
     /**
      * 嵌套模式的单例
@@ -80,9 +78,8 @@ public class DroolsEngine {
                 kieContainer = (KieContainerImpl)getKieContainer();
                 kieBase = kieContainer.getKieBase();
                 valid_in_kfs_and_kiebase();
-            }else{
-                //condition.await();
             }
+
         }catch (Exception e){
             log.error("Compile Exception->",e);
         }finally {
@@ -104,11 +101,11 @@ public class DroolsEngine {
      * 校验kfs和kiebase的规则
      */
     public void valid_in_kfs_and_kiebase(){
-        log.info("=*=*=*=*=*=*=*=*=*=*=*Valid[start]=*=*=*=*=*=*=*=*=*=*=*");
+        log.debug("=*=*=*=*=*=*=*=*=*=*=*Valid[start]=*=*=*=*=*=*=*=*=*=*=*");
         List<String> drls_kfs = getRules_fromKFS();
         List<String> drls_kiebase = getRules_fromkieBase();
         areTheySame(drls_kfs,drls_kiebase);
-        log.info("=*=*=*=*=*=*=*=*=*=*=*Valid[end]=*=*=*=*=*=*=*=*=*=*=*");
+        log.debug("=*=*=*=*=*=*=*=*=*=*=*Valid[end]=*=*=*=*=*=*=*=*=*=*=*");
     }
 
     /**
@@ -119,7 +116,7 @@ public class DroolsEngine {
         boolean isSameFlag = drls_kfs.toString().equals(drls_kiebase.toString());
         if(isSameFlag){
             res.put("ValidResult",true);
-            log.info("ValidResult={}",isSameFlag);
+            log.debug("ValidResult={}",isSameFlag);
         }else{
             res.put("ValidResult",false);
             log.error("They are NOT SAME,kfs={}, kiebase={}",drls_kfs,drls_kiebase);
@@ -137,7 +134,7 @@ public class DroolsEngine {
             String kieFilePath = "src/main/resources/" + drlname;
             //kfs.delete(kieFilePath);
             kfs.write(kieFilePath, content);
-            log.info("[{} insert to KFS]add rule>>{} ",this.engineName,drlname);
+            log.debug("[{} insert to KFS]add rule>>{} ",this.engineName,drlname);
         }
     }
 
@@ -147,7 +144,7 @@ public class DroolsEngine {
     public void deleteDrls(String drlname){
         String kieFilePath = "src/main/resources/" + drlname;
         kfs.delete(kieFilePath);
-        log.info("[{} delete from KFS] rule >>{} ",this.engineName,drlname);
+        log.debug("[{} delete from KFS] rule >>{} ",this.engineName,drlname);
     }
 
 
@@ -168,7 +165,7 @@ public class DroolsEngine {
         MemoryFileSystem mfs = kfs.getMfs();
         for(Map.Entry<String, byte[]> entry :mfs.getMap().entrySet()){
             String drlPath = entry.getKey();
-            log.info("[{}]===>KFS's rule ={} ",this.engineName,drlPath);
+            log.debug("[{}]===>KFS's rule ={} ",this.engineName,drlPath);
             drlPath = drlPath.replace("src/main/resources/", "");
             res.add(drlPath);
         }
@@ -187,7 +184,7 @@ public class DroolsEngine {
             RuleImpl[] rules = kiePackage.getRules().toArray(new RuleImpl[0]);
             for(RuleImpl rule:rules){
                 String name = rule.getName();
-                log.info("[{}]=====>kieBase's rule={} ",this.engineName,name);
+                log.debug("[{}]=====>kieBase's rule={} ",this.engineName,name);
 
                 name = name+".drl";
                 res.add(name);
@@ -210,7 +207,7 @@ public class DroolsEngine {
         try {
             matchNum = ks.fireAllRules(
                     match -> {
-                        log.info("MatchRuleName:{}" ,match.getRule().getName() );
+                        log.debug("MatchRuleName:{}" ,match.getRule().getName() );
                         return true;
                     }
             );
@@ -233,9 +230,13 @@ public class DroolsEngine {
 
 /***************************功能测试***************************************/
     public static void main(String[] args){
-        new ParallelMyTool().doParallel();
+        //new ParallelMyTool().doParallel();
         //new ParallelMyTool().doSingleton();
     }
+
+
+
+
 
     /*=*==*==*==*==*==*==*==*=模拟并发*=*==*==*==*==*==*==*==*=*/
 
@@ -248,7 +249,7 @@ public class DroolsEngine {
          * 并发
          */
         private void doParallel(){
-            int parallelismNum = 100000;
+            int parallelismNum = 1000;
             for(int i=0;i<parallelismNum;i++){
                 new Thread(()->{
                     String engineName = RandomStringUtils.randomAlphanumeric(2);
@@ -256,10 +257,10 @@ public class DroolsEngine {
                     Map<String,String> drls = createDrls(droolsEngine,3);
                     addDrlsToKFS(droolsEngine,drls);
                     buildEngine(droolsEngine);
-/*                    List<String> list = createFact(droolsEngine,2);
+                   List<String> list = createFact(droolsEngine,2);
                     match(droolsEngine,list);
                     removeDrlsFromKFS(droolsEngine,drls);
-                    buildEngine(droolsEngine);*/
+                    buildEngine(droolsEngine);
                 }).start();
             }
         }
@@ -268,14 +269,14 @@ public class DroolsEngine {
          * 使用单例的情况
          */
         private void doSingleton(){
-            int parallelismNum = 2;
+            int parallelismNum = 1000;//1000的数量跑不起来
             for(int i=0;i<parallelismNum;i++){
                 new Thread(()->{
                     DroolsEngine droolsEngine =  DroolsEngine.getInstance();
                     Map<String,String> drls = createDrls(droolsEngine,3);
                     addDrlsToKFSSinglton(droolsEngine,drls);
                     buildEngineSinglton(droolsEngine);
-                    List<String> list = createFact(droolsEngine,2);
+                    List<String> list = createFact(droolsEngine,3);
                     match(droolsEngine,list);
                     removeDrlsFromKFSSinglton(droolsEngine,drls);
                     buildEngineSinglton(droolsEngine);
@@ -284,57 +285,58 @@ public class DroolsEngine {
         }
 
         private Map<String,String> createDrls(DroolsEngine droolsEngine,int drlContentsNum){
-            log.info("{}{}",droolsEngine.engineName,"初始化drl文件内容");
+            log.debug("{}{}",droolsEngine.engineName,"初始化drl文件内容");
             String randomStr = RandomStringUtils.randomAlphanumeric(2);
             Map<String,String> drls = buildDrlContents(drlContentsNum,droolsEngine.engineName,randomStr);
             return drls;
         }
 
         private List<String> createFact(DroolsEngine droolsEngine,int elemNum){
-            log.info("{}{}",droolsEngine.engineName,"初始化事实");
+            log.debug("{}{}",droolsEngine.engineName,"初始化事实");
             List<String> list = getFact(elemNum);
             return list;
         }
 
         private void match(DroolsEngine droolsEngine,List<String> list){
-            log.info("{}{}",droolsEngine.engineName,"将事实与规则进行匹配");
-            droolsEngine.runMatch(list);
+            log.debug("{}{}",droolsEngine.engineName,"将事实与规则进行匹配");
+            int matchNum = droolsEngine.runMatch(list);
+            log.info("匹配数量:{}",matchNum);
         }
 
         private void addDrlsToKFSSinglton(DroolsEngine droolsEngine,Map<String,String> drls){
-            log.info("{}{}",droolsEngine.engineName,"将drl文件内容添加到drools引擎的kfs中");
+            log.debug("{}{}",droolsEngine.engineName,"将drl文件内容添加到drools引擎的kfs中");
             droolsEngine.add_drlContent_list(drls);
         }
 
         private void addDrlsToKFS(DroolsEngine droolsEngine,Map<String,String> drls){
-            log.info("{}{}",droolsEngine.engineName,"将drl文件内容添加到drools引擎的kfs中");
+            log.debug("{}{}",droolsEngine.engineName,"将drl文件内容添加到drools引擎的kfs中");
             droolsEngine.add_drlContent_list(drls);
             droolsEngine.needBuildFlag = true;
-            log.info("{}待编译标志->{}：待编译，kfs资源状态为新",droolsEngine.engineName,droolsEngine.needBuildFlag);
+            log.debug("{}待编译标志->{}：待编译，kfs资源状态为新",droolsEngine.engineName,droolsEngine.needBuildFlag);
         }
 
         private void buildEngineSinglton(DroolsEngine droolsEngine){
-            log.info("{}{}",droolsEngine.engineName,"将drools引擎kfs中的规则进行编译");
+            log.debug("{}{}",droolsEngine.engineName,"将drools引擎kfs中的规则进行编译");
             droolsEngine.prepareEngineSinglton();
         }
 
         private void buildEngine(DroolsEngine droolsEngine){
-            log.info("{}{}",droolsEngine.engineName,"将drools引擎kfs中的规则进行编译");
+            log.debug("{}{}",droolsEngine.engineName,"将drools引擎kfs中的规则进行编译");
             droolsEngine.prepareEngine();
             droolsEngine.needBuildFlag = false;
-            log.info("{}待编译标志->{}：已编译，kfs资源状态为旧",droolsEngine.engineName,droolsEngine.needBuildFlag);
+            log.debug("{}待编译标志->{}：已编译，kfs资源状态为旧",droolsEngine.engineName,droolsEngine.needBuildFlag);
         }
 
         private void removeDrlsFromKFSSinglton(DroolsEngine droolsEngine,Map<String,String> drls){
-            log.info("{}{}",droolsEngine.engineName,"根据drl文件名剔除drools引擎kfs中的规则");
+            log.debug("{}{}",droolsEngine.engineName,"根据drl文件名剔除drools引擎kfs中的规则");
             droolsEngine.remove__drlContent_list(drls);
         }
 
         private void removeDrlsFromKFS(DroolsEngine droolsEngine,Map<String,String> drls){
-            log.info("{}{}",droolsEngine.engineName,"根据drl文件名剔除drools引擎kfs中的规则");
+            log.debug("{}{}",droolsEngine.engineName,"根据drl文件名剔除drools引擎kfs中的规则");
             droolsEngine.remove__drlContent_list(drls);
             droolsEngine.needBuildFlag = true;
-            log.info("{}待编译标志->{}：待编译，kfs资源状态为新",droolsEngine.engineName,droolsEngine.needBuildFlag);
+            log.debug("{}待编译标志->{}：待编译，kfs资源状态为新",droolsEngine.engineName,droolsEngine.needBuildFlag);
         }
     }
 
@@ -370,9 +372,12 @@ public class DroolsEngine {
                 + " return false; \n"
                 + "}\n"
                 + "rule \"{engineName}{name}\" \n"
+
                 + "when \n"
                 + " $list1:List(judge{engineName}{name}(this)) \n"
+                
                 + "then \n"
+                //+ " System.out.println(\"{engineName}{name}\");\n"
                 + "end \n";
     }
 

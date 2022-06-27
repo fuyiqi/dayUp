@@ -12,12 +12,15 @@ import org.kie.api.definition.KiePackage;
 import org.kie.api.definition.rule.Rule;
 import org.kie.api.runtime.KieSession;
 import org.kie.internal.utils.KieHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class DroolsHelper {
+    private static final Logger log= LoggerFactory.getLogger(DroolsHelper.class);
     private static KieHelper kieHelper;
     private static KieBase kieBase;
     private static KieContainerImpl kieContainer;
@@ -50,11 +53,11 @@ public class DroolsHelper {
         Results pre_build = kieHelper.verify();
         if(pre_build.hasMessages(Message.Level.ERROR)){
             String error_msg = pre_build.getMessages(Message.Level.ERROR).toString();
-            System.out.println(error_msg);
+            log.error(error_msg);
             return ;
         }
         kieBase  = kieHelper.build();
-        this.kfs = (KieFileSystemImpl) kieHelper.kfs;
+        kfs = (KieFileSystemImpl) kieHelper.kfs;
         //校验
         getRuleFileNames_fromKFS();
         System.out.println("+++++++");
@@ -81,7 +84,7 @@ public class DroolsHelper {
     public void remove_rule(String name){
         //构建当前规则在drools中全路径
         String path = buildCompletePath_inDrools(name);
-        this.kfs.delete(path);
+        kfs.delete(path);
         compile_rules();
     }
 
@@ -97,11 +100,11 @@ public class DroolsHelper {
      */
     public Map<String,String> getRuleFileNames_fromKFS() {
         Map<String,String> res = new HashMap<>();
-        MemoryFileSystem mfs = this.kfs.getMfs();
+        MemoryFileSystem mfs = kfs.getMfs();
          for(Map.Entry<String,byte[]> entrySet:mfs.getMap().entrySet()){
             String drlPathName = entrySet.getKey();
             String drlContent = new String(entrySet.getValue());
-            System.out.println(drlPathName);
+             log.info(drlPathName);
             res.put(drlPathName,drlContent);
          }
         return res;
@@ -119,11 +122,11 @@ public class DroolsHelper {
             String packageName = kiePackage.getName();
             if(!packageName.equals(CommonConstants.defaultKiePackageName)){
                 Rule[] rules = kiePackage.getRules().toArray(new Rule[0]);
-                //System.out.println(packageName+"->" + rules.length);
+
                 for (Rule rule : rules) {
                     //规则内容中的规则名
                     String ruleName = buildCompletePath_inDrools(rule.getName()+".drl");
-                    System.out.println(ruleName);
+                    log.info(ruleName);
                 }
             }
 
@@ -141,13 +144,13 @@ public class DroolsHelper {
         try {
             matchNum = kieSession.fireAllRules(
                     match -> {
-                        System.out.println("============MatchRuleName:" + match.getRule().getName() + "============");
+                        log.info("============MatchRuleName:" + match.getRule().getName() + "============");
                         return true;
                     }
             );
 
         }catch (Exception e){
-            System.out.println("[runMatch ERROR],"+e);
+            log.error("[runMatch ERROR],",e);
         }
         finally {
             if(null != kieSession){
@@ -188,5 +191,9 @@ public class DroolsHelper {
     }
 
 
+    public static void main(String[] args) {
+        DroolsHelper dh = DroolsHelper.getInstance();
 
+
+    }
 }
