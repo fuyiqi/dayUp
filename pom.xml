@@ -99,7 +99,16 @@
             <version>${flink.version}</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-client</artifactId>
+            <version>6.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-client</artifactId>
+            <version>5.12.3</version>
+        </dependency>
 
 
     </dependencies>
@@ -120,6 +129,7 @@
             </plugin>
             <!-- resource配置 -->
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>${maven-resources-plugin.version}</version>
                 <executions>

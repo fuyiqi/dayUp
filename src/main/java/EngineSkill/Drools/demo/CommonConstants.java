@@ -70,10 +70,10 @@ public class CommonConstants {
         List<String> res = new ArrayList<>();
         File file = new File(dir_path_str);
         File[] array = file.listFiles();
-        for (int i = 0; i < array.length; i++){
-            if (array[i].isFile()){
-                String tmp = array[i].getPath();
-                tmp = tmp.replace("\\","/");
+        for (File value : array) {
+            if (value.isFile()) {
+                String tmp = value.getPath();
+                tmp = tmp.replace("\\", "/");
                 res.add(tmp);
             }
         }
