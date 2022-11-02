@@ -286,14 +286,12 @@ public class DroolsEngine {
         private Map<String,String> createDrls(DroolsEngine droolsEngine,int drlContentsNum){
             log.debug("{}{}",droolsEngine.engineName,"初始化drl文件内容");
             String randomStr = RandomStringUtils.randomAlphanumeric(2);
-            Map<String,String> drls = buildDrlContents(drlContentsNum,droolsEngine.engineName,randomStr);
-            return drls;
+            return buildDrlContents(drlContentsNum,droolsEngine.engineName,randomStr);
         }
 
         private List<String> createFact(DroolsEngine droolsEngine,int elemNum){
             log.debug("{}{}",droolsEngine.engineName,"初始化事实");
-            List<String> list = getFact(elemNum);
-            return list;
+            return getFact(elemNum);
         }
 
         private void match(DroolsEngine droolsEngine,List<String> list){

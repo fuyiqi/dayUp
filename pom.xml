@@ -21,6 +21,7 @@
         <freemaker.version>2.3.23</freemaker.version>
         <spring-tx.version>3.1.0.RELEASE</spring-tx.version>
         <flink.version>1.13.3</flink.version>
+        <kubernetes-client.version>6.2.0</kubernetes-client.version>
 
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.0.0</maven-source-plugin.version>
@@ -102,13 +103,9 @@
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
-            <version>6.1.1</version>
+            <version>${kubernetes-client.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.fabric8</groupId>
-            <artifactId>kubernetes-client</artifactId>
-            <version>5.12.3</version>
-        </dependency>
+
 
 
     </dependencies>

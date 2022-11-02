@@ -1,15 +1,22 @@
 package EngineSkill.K8s;
 
 import io.fabric8.kubernetes.api.model.NamespaceList;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
+import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinitionList;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
-import io.fabric8.kubernetes.client.dsl.internal.RawCustomResourceOperationsImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 
 public class Main {
+    private static final Logger log= LoggerFactory.getLogger(Main.class);
+
     public static String basicYaml = "apiVersion: flink.apache.org/v1beta1\n" +
             "kind: FlinkDeployment\n" +
             "metadata:\n" +
@@ -43,7 +50,7 @@ public class Main {
             NamespaceList myNs = client.namespaces().list();
             myNs.getItems().forEach(
                     namespace -> {
-                        //System.out.println(namespace.getMetadata().getName()+":"+namespace.getStatus().getPhase());
+                        //log.info(namespace.getMetadata().getName()+":"+namespace.getStatus().getPhase());
                     }
             );
             //自定义资源pojo
@@ -56,12 +63,12 @@ public class Main {
                     .withVersion("v1beta1")
                     .withPlural("flinkdeployments")
                     .build();
-            //构建crd操作引擎
-            RawCustomResourceOperationsImpl crdIml = client.customResource(context);
-            System.out.println(crdIml.delete("default"));
+            log.info("Listing all current Custom Resource Definitions :");
+            CustomResourceDefinitionList crdList = client.apiextensions().v1().customResourceDefinitions().list();
+            crdList.getItems().forEach(crd -> log.info(crd.getMetadata().getName()));
 
         }catch (Exception e){
-            System.out.println(e);
+            log.error("Exception:\t",e);
         }
 
 
