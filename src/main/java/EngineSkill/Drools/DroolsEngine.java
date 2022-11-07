@@ -1,5 +1,6 @@
 package EngineSkill.Drools;
 
+import EngineSkill.Drools.demo.CommonConstants;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.drools.compiler.compiler.io.memory.MemoryFileSystem;
 import org.drools.compiler.kie.builder.impl.KieContainerImpl;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 
 
 public class DroolsEngine {
@@ -229,15 +231,26 @@ public class DroolsEngine {
 
 /***************************功能测试***************************************/
     public static void main(String[] args){
-        //new ParallelMyTool().doParallel();
-        //new ParallelMyTool().doSingleton();
+
+    }
+
+    //TODO
+    public static void TestDemo1(){
+        //创建drools引擎
+        DroolsEngine droolsEngine =  DroolsEngine.getInstance();
+        //获取规则库
+        Map<String,String> drls = CommonConstants.getRuleInfoList("src/main/resources/drools");
+
     }
 
 
 
+    /*=*==*==*==*==*==*==*==*=模拟并发[start]*=*==*==*==*==*==*==*==*=*/
 
-
-    /*=*==*==*==*==*==*==*==*=模拟并发*=*==*==*==*==*==*==*==*=*/
+    public static void TestConcurrence(){
+        new ParallelMyTool().doParallel();
+        new ParallelMyTool().doSingleton();
+    }
 
     /**
      * 使用多线程的并发类
@@ -336,6 +349,8 @@ public class DroolsEngine {
             log.debug("{}待编译标志->{}：待编译，kfs资源状态为新",droolsEngine.engineName,droolsEngine.needBuildFlag);
         }
     }
+
+    /*=*==*==*==*==*==*==*==*=模拟并发[end]*=*==*==*==*==*==*==*==*=*/
 
     /**
      * 构建事实

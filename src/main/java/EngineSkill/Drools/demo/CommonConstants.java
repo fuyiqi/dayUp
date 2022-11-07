@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +49,7 @@ public class CommonConstants {
             File file = new File(filePath);
             if(file.isFile() && file.exists()) { //判断文件是否存在
                 InputStreamReader read = new InputStreamReader(
-                        new FileInputStream(file),fileEnCoding);//考虑到编码格式
+                        Files.newInputStream(file.toPath()),fileEnCoding);//考虑到编码格式
                 BufferedReader bufferedReader = new BufferedReader(read);
                 String line = null;
                 while ((line = bufferedReader.readLine()) != null){
@@ -92,10 +93,13 @@ public class CommonConstants {
             String content = CommonConstants.readFileContent(name,"UTF8");
             res.put(name,content);
         }
+        log.info(res.toString());
         return res;
     }
 
-
+    public static void main(String[] args) {
+        getRuleInfoList("src/main/resources/drools");
+    }
 
 
 

@@ -1,21 +1,19 @@
 package EngineSkill.K8s;
 
+import EngineSkill.K8s.crds.FlinkDeployment;
 import io.fabric8.kubernetes.api.model.NamespaceList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinitionList;
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.*;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 
-public class Main {
-    private static final Logger log= LoggerFactory.getLogger(Main.class);
+public class CRDTest {
+    private static final Logger log= LoggerFactory.getLogger(CRDTest.class);
 
     public static String basicYaml = "apiVersion: flink.apache.org/v1beta1\n" +
             "kind: FlinkDeployment\n" +
@@ -63,9 +61,19 @@ public class Main {
                     .withVersion("v1beta1")
                     .withPlural("flinkdeployments")
                     .build();
-            log.info("Listing all current Custom Resource Definitions :");
+            //获取集群crd列表
             CustomResourceDefinitionList crdList = client.apiextensions().v1().customResourceDefinitions().list();
-            crdList.getItems().forEach(crd -> log.info(crd.getMetadata().getName()));
+            String flinkDeploymentCRDName = CustomResource.getCRDName(FlinkDeployment.class);
+            CustomResourceDefinition flinkDeploymentCRD = null;
+            for (CustomResourceDefinition crd :crdList.getItems()){
+                ObjectMeta metadata = crd.getMetadata();
+                if (metadata != null){
+                    String name = metadata.getName();
+                    if(flinkDeploymentCRDName.equals(name)){
+                        flinkDeploymentCRD = crd;
+                    }
+                }
+            }
 
         }catch (Exception e){
             log.error("Exception:\t",e);
