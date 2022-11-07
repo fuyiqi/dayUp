@@ -1,0 +1,25 @@
+package drools;
+
+rule "testisAgendaGroup1"
+agenda-group "ag1"
+    when
+        eval(true)
+    then
+        System.out.println("规则 testisAgendaGroup1 设置属性 agenda-group\"ag1\" ");
+end
+
+rule "testisAgendaGroup2"
+agenda-group "ag2"
+    when
+        eval(true)
+    then
+        System.out.println("规则 testisAgendaGroup2 设置属性 agenda-group\"ag2\" ");
+end
+
+rule "testisAgendaGroup3"
+agenda-group "ag1"
+    when
+        eval(true)
+    then
+        System.out.println("规则 testisAgendaGroup3 设置属性 agenda-group\"ag1\" ");
+end

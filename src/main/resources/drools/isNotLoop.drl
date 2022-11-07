@@ -1,9 +1,0 @@
-rule "testNoLoop1"
-    //no-loop true
-    when
-       $p:Person(age==30);
-    then
-       $p.setAge(30);
-       update($p);
-       System.out.println("testNoLoop1 不设置 no-loop时的效果");
-end

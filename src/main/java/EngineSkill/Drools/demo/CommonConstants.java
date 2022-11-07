@@ -75,7 +75,9 @@ public class CommonConstants {
             if (value.isFile()) {
                 String tmp = value.getPath();
                 tmp = tmp.replace("\\", "/");
-                res.add(tmp);
+                if(tmp.split("\\.")[1].toLowerCase().equals("drl")){
+                    res.add(tmp);
+                }
             }
         }
         return res;
@@ -92,8 +94,10 @@ public class CommonConstants {
         for(String name:name_list){
             String content = CommonConstants.readFileContent(name,"UTF8");
             res.put(name,content);
+
+
         }
-        log.info(res.toString());
+
         return res;
     }
 

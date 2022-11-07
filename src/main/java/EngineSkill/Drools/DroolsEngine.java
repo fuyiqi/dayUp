@@ -1,11 +1,13 @@
 package EngineSkill.Drools;
 
+import EngineSkill.Drools.bean.Person;
 import EngineSkill.Drools.demo.CommonConstants;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.drools.compiler.compiler.io.memory.MemoryFileSystem;
 import org.drools.compiler.kie.builder.impl.KieContainerImpl;
 import org.drools.compiler.kie.builder.impl.KieFileSystemImpl;
 import org.drools.core.definitions.rule.impl.RuleImpl;
+import org.drools.core.impl.StatefulKnowledgeSessionImpl;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
 import org.kie.api.builder.*;
@@ -15,6 +17,7 @@ import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.rule.FactHandle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Test;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -95,7 +98,7 @@ public class DroolsEngine {
     public void prepareEngineSinglton(){
         kieContainer = (KieContainerImpl)getKieContainer();
         kieBase = kieContainer.getKieBase();
-        valid_in_kfs_and_kiebase();
+        //valid_in_kfs_and_kiebase();//单例不会出问题
     }
 
     /**
@@ -208,7 +211,7 @@ public class DroolsEngine {
         try {
             matchNum = ks.fireAllRules(
                     match -> {
-                        log.debug("MatchRuleName:{}" ,match.getRule().getName() );
+                        log.info("MatchRuleName:{}" ,match.getRule().getName() );
                         return true;
                     }
             );
@@ -230,25 +233,131 @@ public class DroolsEngine {
 
 
 /***************************功能测试***************************************/
-    public static void main(String[] args){
+
+
+    /**
+     * 防止死循环，当规则通过update之类的函数修改了Fact对象时，可能使规则再次被激活，从而导致死循环。
+     * 将no-loop设置为true的目的是避免当前规则then部分被修改后的事实对象再次被激活，从而防止死循环的发生，即执行下面的规则。
+     */
+    @Test
+    public void TestisNotLoop(){
+        DroolsEngine droolsEngine = getDroolsEnginewithRules();
+        //构建待匹配的事实
+        Person person = new Person(30,"张三","一班");
+        //匹配
+        int matchNum = droolsEngine.runMatch(person);
 
     }
 
-    //TODO
-    public static void TestDemo1(){
+    /**
+     * no-loop的升级版。
+     * agenda-group再次被激活时，即使在规则体中设置了lock-on-active为true，该规则体也不能再次被激活，即无论如何更新规则事实对象，当前规则也只能被触发一次。
+     */
+    @Test
+    public void TestisLockNoActive(){
+        DroolsEngine droolsEngine = getDroolsEnginewithRules();
+        Person person = new Person(30,"张三","一班");
+        //匹配
+        int matchNum = droolsEngine.runMatch(person);
+
+    }
+
+    /**
+     * salience
+     * 规则体被执行的顺序，每一个规则都有一个默认的执行顺序，如果不设置salience属性，规则体的执行顺序为由上到下。salience值可以是一个整数，但也可以是一个负数，其值越大，执行顺序越高，排名越靠前。
+     */
+
+    /**
+     * activation-group
+     * activation-group是指激活分组，通过字符串定义分组名称，具有相同组名称的规则体有且只有一个规则被激活，
+     * 其他规则体的LHS部分仍然为true也不会再被执行。该属性受salience属性的影响，
+     * 如当前规则文件中的其他规则未设计该属性，则视为规则处于被激活状态，并不受该属性的影响。
+     */
+    @Test
+    public void TestisActiveGroup(){
+        DroolsEngine droolsEngine = getDroolsEnginewithRules();
+        droolsEngine.runMatch("");
+
+    }
+
+    /**
+     * 另一种可控的规则执行方式，是指用户可以通过配置agenda-group的参数来控制规则的执行，而且只有获取焦点的规则才会被激活。
+     * 实际应用中的agenda-group可以与auto-focus属性一起使用，这样就不会出现上述问题了。如果将某个规则体的auto-focus属性设置为true，
+     * 那么即使该规则设置了agenda-group属性，也不需要在Java代码中设置。
+     */
+    @Test
+    public void TestisAgendaGroup(){
+        DroolsEngine droolsEngine = getDroolsEnginewithRules();
+        StatefulKnowledgeSessionImpl kieSession = (StatefulKnowledgeSessionImpl) droolsEngine.kieContainer.newKieSession();;
+        //让AgendaGroup分组为ag1的获取焦点
+        kieSession.getAgenda().getAgendaGroup("ag1").setFocus();
+        kieSession.fireAllRules(
+                match -> {
+                    log.info("MatchRuleName:{}" ,match.getRule().getName() );
+                    return true;
+                }
+        );
+        kieSession.dispose();
+    }
+
+    @Test
+    public void TestisAgendaGroupAndActivationGroup6(){
+        DroolsEngine droolsEngine = getDroolsEnginewithRules();
+        StatefulKnowledgeSessionImpl kieSession = (StatefulKnowledgeSessionImpl) droolsEngine.kieContainer.newKieSession();;
+        //让AgendaGroup分组为ag1的获取焦点
+        kieSession.getAgenda().getAgendaGroup("ag6").setFocus();
+        kieSession.fireAllRules(
+                match -> {
+                    log.info("MatchRuleName:{}" ,match.getRule().getName() );
+                    return true;
+                }
+        );
+        kieSession.dispose();
+    }
+
+    @Test
+    public void TestisAgendaGroupAndActivationGroup8(){
+        DroolsEngine droolsEngine = getDroolsEnginewithRules();
+        StatefulKnowledgeSessionImpl kieSession = (StatefulKnowledgeSessionImpl) droolsEngine.kieContainer.newKieSession();;
+        //让AgendaGroup分组为ag1的获取焦点
+        kieSession.getAgenda().getAgendaGroup("ag8").setFocus();
+        kieSession.fireAllRules(
+                match -> {
+                    log.info("MatchRuleName:{}" ,match.getRule().getName() );
+                    return true;
+                }
+        );
+        kieSession.dispose();
+    }
+
+
+
+
+    /**
+     * 获取有规则内容的引擎
+     * @return
+     */
+    public static DroolsEngine getDroolsEnginewithRules(){
         //创建drools引擎
         DroolsEngine droolsEngine =  DroolsEngine.getInstance();
         //获取规则库
         Map<String,String> drls = CommonConstants.getRuleInfoList("src/main/resources/drools");
-
+        //规则库添加至drools引擎中
+        droolsEngine.add_drlContent_list(drls);
+        //drools引擎对规则进行编译
+        droolsEngine.prepareEngineSinglton();
+        return droolsEngine;
     }
+
+
+
 
 
 
     /*=*==*==*==*==*==*==*==*=模拟并发[start]*=*==*==*==*==*==*==*==*=*/
 
-    public static void TestConcurrence(){
-        new ParallelMyTool().doParallel();
+    public static void main(String[] args){
+        //new ParallelMyTool().doParallel();
         new ParallelMyTool().doSingleton();
     }
 

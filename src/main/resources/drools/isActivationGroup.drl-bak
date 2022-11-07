@@ -1,0 +1,20 @@
+package drools;
+
+
+rule "testActivationGroup1"
+activation-group "testGroup"
+salience 0
+    when
+        eval(true)
+    then
+        System.out.println("规则 testActivationGroup1 设置属性 activation-group \"testGroup\" ");
+end
+
+rule "testActivationGroup2"
+activation-group "testGroup"
+salience 12
+    when
+        eval(true)
+    then
+        System.out.println("规则 testActivationGroup2 设置属性 activation-group \"testGroup\" ");
+end
