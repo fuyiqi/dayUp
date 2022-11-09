@@ -1,11 +1,11 @@
 package EngineSkill.Drools;
 
 import EngineSkill.Drools.bean.Person;
-import EngineSkill.Drools.demo.CommonConstants;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.drools.compiler.compiler.io.memory.MemoryFileSystem;
 import org.drools.compiler.kie.builder.impl.KieContainerImpl;
 import org.drools.compiler.kie.builder.impl.KieFileSystemImpl;
+import org.drools.core.audit.KnowledgeRuntimeLoggerProviderImpl;
 import org.drools.core.definitions.rule.impl.RuleImpl;
 import org.drools.core.impl.StatefulKnowledgeSessionImpl;
 import org.kie.api.KieBase;
@@ -15,6 +15,7 @@ import org.kie.api.definition.KiePackage;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.rule.FactHandle;
+import org.kie.internal.logger.KnowledgeRuntimeLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -55,6 +56,10 @@ public class DroolsEngine {
     public static DroolsEngine getInstance(){
         return Holder._instance;
     }
+
+
+
+
 
     /**
      * 获取kieContainer

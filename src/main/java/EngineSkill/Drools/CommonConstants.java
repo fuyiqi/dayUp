@@ -1,14 +1,14 @@
-package EngineSkill.Drools.demo;
+package EngineSkill.Drools;
 
 import org.drools.core.impl.KnowledgeBaseImpl;
 import org.kie.api.KieBase;
+
 import org.kie.api.runtime.KieContainer;
 
 
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Test;
 
 public class CommonConstants {
     private static final Logger log = LoggerFactory.getLogger(CommonConstants.class);
@@ -101,21 +102,10 @@ public class CommonConstants {
         return res;
     }
 
-    public static void main(String[] args) {
+    @Test
+    public static void TestGetRuleInfoList() {
         getRuleInfoList("src/main/resources/drools");
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
